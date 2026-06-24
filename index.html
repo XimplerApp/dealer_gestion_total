@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Galera RICO v2.3 — Sistema Integral Dealer Semillas</title>
+<title>Galera RICO v2.6 — Sistema Integral Dealer Semillas</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -649,7 +649,7 @@ const APP = (()=>{
       'Fecha Actualización ISO':isoDate(r.updatedAt||r.fechaActualizacionISO||r.fecha)
     };
   }
-  function enrichTrials(rows){ const latest=latestByTrialArray(); return rows.map(t=>{ const r=latest[t.id]||{}; const rx=r.id?resultExportCore(r,[t]):null; return {
+  function enrichTrials(rows){ const latest=latestByTrialArray(); return rows.map(t=>{ const r=latest[t.id]||{}; const hasResult=!!r.id; const rx=hasResult?resultExportCore(r,[t]):null; const impactoPotencial=rx&&rx.areaPot?rx.margenHa*rx.areaPot:0; return {
     'ID Ensayo':t.id,'Folio externo Galera':t.folioExternoGalera||'','No. ensayo externo':t.noEnsayoExterno||'','Fuente captura':t.fuenteCaptura||'',
     'Cultivo':t.cultivo||'','Variedad Galera':t.variedad||'','Casa comercial':t.casaComercial||'','Variedad control':t.control||'','Proveedor control':t.proveedorControl||'',
     'Productor':t.productor||'','Cliente / cuenta objetivo':t.clienteObjetivo||'','Técnico responsable':t.tecnico||'','Responsable comercial':t.responsableComercial||'',
@@ -658,8 +658,21 @@ const APP = (()=>{
     'Superficie ha':t.superficieHa||0,'Tipo de ensayo Galera':t.modoEnsayo||'','Estado':t.estado||'','Prioridad':t.prioridad||'',
     'Vínculo comercial':t.vinculoComercial||'','Mercado objetivo':t.mercadoObjetivo||'','Segmento objetivo':t.segmentoObjetivo||'','Competidor objetivo':t.competidorObjetivo||'',
     'Área potencial ha':t.areaPotencialHa||0,'Ticket potencial':t.ticketPotencial||0,'Objetivo medible':t.objetivo||'','Criterio éxito':t.criterio||'','Problema / hipótesis':t.hipotesis||'','Salida comercial esperada':t.salidaComercial||'',
-    'Última fecha evaluación':r.fecha||'','Estado objetivo':r.id?resultStatusFromObjective(r):'','Detalle objetivo':r.id?resultDetailObjective(r,t):'','Rendimiento control (ton/ha)':r.rendControl||0,'Rendimiento Galera (ton/ha)':r.rendTratado||0,'Diferencia (ton/ha)':rx?rx.diffTon:0,'Diferencia (kg/ha)':rx?rx.diffKgHa:0,'% Mejora':rx?rx.mejora:0,'Costo total último resultado $':rx?rx.costoTotal:0,'Margen total último resultado $':rx?rx.margenTotal:0,'ROI último resultado':rx?rx.roiRatio:0,'Evaluación última':r.evaluacion||'','Repetir':r.id?resultRepeatFlag(r):'','Recomendación última':r.recomendacionComercialFinal||r.recomendacionComercialGalera||r.recomendacion||'',
-    'Fecha ISO':isoDate(t.siembra||t.fechaAlta||''),'Fecha Actualización ISO':isoDate(t.updatedAt||t.fechaAlta||'')
+
+    'ID último resultado':r.id||'','Última fecha evaluación':r.fecha||'','Fecha actualización último resultado':r.updatedAt||'',
+    'Estado objetivo':hasResult?resultStatusFromObjective(r):'','Detalle objetivo':hasResult?resultDetailObjective(r,t):'',
+    'Área evaluada ha último resultado':hasResult?rx.area:0,'Superficie potencial productor ha último resultado':hasResult?rx.areaPot:0,
+    'Rendimiento control (ton/ha)':r.rendControl||0,'Rendimiento Galera (ton/ha)':r.rendTratado||0,'Diferencia (ton/ha)':hasResult?rx.diffTon:0,'Diferencia (kg/ha)':hasResult?rx.diffKgHa:0,'Producción adicional total kg':hasResult?rx.diffKgTotal:0,'% Mejora':hasResult?rx.mejora:0,
+
+    'Semillas último resultado $':r.semilla||0,'Insumos último resultado $':r.insumos||0,'Material último resultado $':r.materiales||0,'Horas técnico último resultado':r.horasTec||0,'Costo por hora último resultado $':r.costoHora||0,'Costo horas último resultado $':hasResult?rx.costoHoras:0,'Traslados último resultado $':r.traslados||0,'Otros último resultado $':r.otros||0,'Costo total último resultado $':hasResult?rx.costoTotal:0,
+    'Precio por kg último resultado $':r.precioKg||0,'Costo producción por kg último resultado $':r.costoVariableKg||0,'Margen unitario último resultado $':hasResult?rx.unitMargin:0,'Margen por ha último resultado $':hasResult?rx.margenHa:0,'Margen total último resultado $':hasResult?rx.margenTotal:0,'Impacto potencial proyectado último resultado $':impactoPotencial,'Meta ROI cultivo último resultado':hasResult?rx.meta:0,'ROI último resultado':hasResult?rx.roiRatio:0,
+
+    'Evaluación última':r.evaluacion||'','Repetir':hasResult?resultRepeatFlag(r):'','Recomendación última':r.recomendacionComercialFinal||r.recomendacionComercialGalera||r.recomendacion||'',
+    'Calidad comercial último resultado':r.calidadComercialTexto||r.calidadComercial||'','Calidad 1-5 último resultado':r.calidad||0,'Facilidad agronómica 1-5 último resultado':r.facilidad||0,'Incidencia plaga % último resultado':r.incidenciaPlagaPct||0,
+    'Sanidad general último resultado':r.sanidadGeneral||'','Uniformidad planta/fruta último resultado':r.uniformidadPlantaFruta||'','Madurez último resultado':r.madurez||'','Color último resultado':r.color||'','Forma último resultado':r.forma||'','Calibre / tamaño dominante último resultado':r.calibreDominante||'','Diámetro producto cm último resultado':r.diametroProductoCm||0,'Tamaño tallo cm último resultado':r.tamanoTalloCm||0,'Peso producto g último resultado':r.pesoProductoG||0,'% cosecha último resultado':r.porcentajeCosecha||0,'Enfermedad observada último resultado':r.enfermedadObservada||'',
+    'Ventaja principal último resultado':r.ventajaPrincipal||'','Desventaja principal último resultado':r.desventajaPrincipal||'','Comparación vs testigo último resultado':r.comparacionVsTestigo||'',
+    'Recomendación comercial Galera último resultado':r.recomendacionComercialGalera||'','Estatus final Galera último resultado':r.estatusFinalGalera||'','Conclusión técnica último resultado':r.conclusion||'','Implicación comercial último resultado':r.implicacionComercial||'',
+    'Fecha ISO ensayo':isoDate(t.siembra||t.fechaAlta||''),'Fecha Actualización ISO ensayo':isoDate(t.updatedAt||t.fechaAlta||''),'Fecha ISO último resultado':hasResult?isoDate(r.fecha):'','Fecha Actualización ISO último resultado':hasResult?isoDate(r.updatedAt||r.fechaActualizacionISO||r.fecha):''
   }; }); }
   function enrichResults(rows){ const trials=read(K.trials); return rows.map(r=>{ const base=exportResultExampleRow(r,trials); const x=resultExportCore(r,trials), t=x.t; return {
     ...base,
@@ -696,8 +709,8 @@ const APP = (()=>{
     const h=String(header||'').toLowerCase();
     if(h==='roi'||h.includes('meta roi')||h.includes('roi último resultado'))return '0.00%';
     if(h.includes('%')||h.includes('score')||h.includes('mejora promedio')||h.includes('roi promedio'))return '0.00"%"';
-    if(h.includes('$')||h.includes('monto')||h.includes('ticket')||h.includes('ventas')||h.includes('margen')||h.includes('costo')||h.includes('precio'))return '$#,##0.00';
-    if(h.includes('fecha evaluación')||h.includes('fecha siembra')||h.includes('fecha cosecha')||h.includes('fecha venta')||h.includes('fecha vencimiento')||h.includes('fecha pago')||h.includes('promesa de pago'))return 'yyyy-mm-dd';
+    if(h.includes('$')||h.includes('monto')||h.includes('ticket')||h.includes('ventas')||h.includes('margen')||h.includes('costo')||h.includes('precio')||h.includes('impacto potencial'))return '$#,##0.00';
+    if(h.includes('fecha')||h.includes('promesa de pago'))return 'yyyy-mm-dd';
     return '';
   }
   function styleExportSheet(ws,headers,rows){
@@ -714,10 +727,10 @@ const APP = (()=>{
   }
   function appendStyledSheet(wb,name,rows){ const headers=exportHeadersFor(name,rows); const ws=(rows&&rows.length)?XLSX.utils.json_to_sheet(rows,{header:headers}):XLSX.utils.aoa_to_sheet([headers]); styleExportSheet(ws,headers,rows||[]); XLSX.utils.book_append_sheet(wb,ws,name.slice(0,31)); }
   function exportRows(key){ if(key==='trials')return enrichTrials(read(K.trials)); if(key==='results')return enrichResults(read(K.results)); return read(key); }
-  function exportSheet(key){ const rows=exportRows(key); if(window.XLSX){const wb=XLSX.utils.book_new(); appendStyledSheet(wb,key,rows); XLSX.writeFile(wb,`Galera_${key}_v2_5.xlsx`);} else download(`${key}.json`,JSON.stringify(rows,null,2),'application/json'); }
+  function exportSheet(key){ const rows=exportRows(key); if(window.XLSX){const wb=XLSX.utils.book_new(); appendStyledSheet(wb,key,rows); XLSX.writeFile(wb,`Galera_${key}_v2_6.xlsx`);} else download(`${key}.json`,JSON.stringify(rows,null,2),'application/json'); }
   function exportVarietalPortfolio(){ return varietalPortfolio().map(x=>({'Variedad':x.variedad,'Competidor benchmark':[...x.benchmarks].filter(Boolean).join(' / '),'Cultivos':[...x.cultivos].filter(Boolean).join(', '),'Regiones':[...x.regions].filter(Boolean).join(', '),'Ensayos':x.trials,'ROI promedio %':avg(x.roi),'Mejora vs control %':avg(x.mejora),'Leads':x.leads,'Órdenes':x.orders,'Ventas cobradas $':x.sales,'Score técnico %':x.technicalScore,'Score varietal %':x.score,'Estatus Galera':x.status,'Decisión':x.decision})); }
-  function exportWorkbook(){ const d=data(); if(!window.XLSX){exportJSON();return;} const wb=XLSX.utils.book_new(); Object.entries({ensayos:enrichTrials(d.trials),bitacora:d.evidence,resultados:enrichResults(d.results),eventos:d.events,leads_pipeline:d.leads,demanda:d.demand,inventario:d.inventory,cartera:d.accounts,scoring:d.scores,portafolio_varietal:exportVarietalPortfolio(),alertas:qualityAudit().alerts,notas_variables:exportNotesRows()}).forEach(([name,rows])=>appendStyledSheet(wb,name,rows)); XLSX.writeFile(wb,'Galera_RICO_v2_5_integral.xlsx'); }
-  function exportJSON(){ const payload={version:'Galera RICO v2.5',exportedAt:new Date().toISOString(),data:data()}; download('Galera_RICO_v2_5_respaldo.json',JSON.stringify(payload,null,2),'application/json'); }
+  function exportWorkbook(){ const d=data(); if(!window.XLSX){exportJSON();return;} const wb=XLSX.utils.book_new(); Object.entries({ensayos:enrichTrials(d.trials),bitacora:d.evidence,resultados:enrichResults(d.results),eventos:d.events,leads_pipeline:d.leads,demanda:d.demand,inventario:d.inventory,cartera:d.accounts,scoring:d.scores,portafolio_varietal:exportVarietalPortfolio(),alertas:qualityAudit().alerts,notas_variables:exportNotesRows()}).forEach(([name,rows])=>appendStyledSheet(wb,name,rows)); XLSX.writeFile(wb,'Galera_RICO_v2_6_integral.xlsx'); }
+  function exportJSON(){ const payload={version:'Galera RICO v2.6',exportedAt:new Date().toISOString(),data:data()}; download('Galera_RICO_v2_6_respaldo.json',JSON.stringify(payload,null,2),'application/json'); }
   function download(filename,content,type){ const blob=new Blob([content],{type}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
   function importJSON(){ const file=$('jsonImport')?.files?.[0]; if(!file){alert('Selecciona un archivo JSON.');return;} const r=new FileReader(); r.onload=()=>{try{const obj=JSON.parse(r.result); const dd=obj.data||obj; Object.entries({trials:K.trials,evidence:K.evidence,results:K.results,events:K.events,leads:K.leads,demand:K.demand,inventory:K.inventory,accounts:K.accounts,scores:K.scores}).forEach(([k,key])=>{if(Array.isArray(dd[k]))write(key,dd[k]);}); toast('JSON importado'); render();}catch(e){alert('JSON inválido.');}}; r.readAsText(file); }
   function clearAll(){ if(!confirm('Esto borra los datos locales v2. ¿Continuar?'))return; Object.values(K).forEach(k=>localStorage.removeItem(storeKey(k))); toast('Datos v2 borrados'); render(); }
