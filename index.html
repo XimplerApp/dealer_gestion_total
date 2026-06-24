@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Galera RICO v2.6 — Sistema Integral Dealer Semillas</title>
+<title>Galera RICO v2.7 — Sistema Integral Dealer Semillas + Agente RICO</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -57,7 +57,7 @@ a{color:var(--primary)}
 <div class="app">
   <aside class="sidebar">
     <div class="brand">
-      <h1>🌾 Galera RICO v2.3</h1>
+      <h1>🌾 Galera RICO v2.7</h1>
       <p>Sistema integral para dealer de semillas: campo, eventos, pipeline, S&OP, cartera e inteligencia varietal.</p>
     </div>
     <div class="nav" id="nav"></div>
@@ -69,6 +69,7 @@ a{color:var(--primary)}
         <button class="btn-secondary" onclick="APP.render()">🔄 Recalcular</button>
         <button class="btn-success" onclick="APP.exportWorkbook()">📤 Exportar Excel</button>
         <button class="btn-purple" onclick="APP.show('calidad')">🧪 Auditoría</button>
+        <button class="btn-primary" onclick="APP.show('agente')">🤖 Agente RICO</button>
       </div>
     </div>
     <section id="page-dashboard" class="page"></section>
@@ -79,6 +80,7 @@ a{color:var(--primary)}
     <section id="page-cartera" class="page"></section>
     <section id="page-inteligencia" class="page"></section>
     <section id="page-operativo" class="page"></section>
+    <section id="page-agente" class="page"></section>
     <section id="page-calidad" class="page"></section>
     <section id="page-exportar" class="page"></section>
   </main>
@@ -98,11 +100,12 @@ const APP = (()=>{
     ['cartera','💳','Cartera & Crédito','Scoring A/B/C, aging, DSO, promesas de pago, bloqueos y recuperación.','Control'],
     ['inteligencia','🚀','Inteligencia Varietal','Portafolio, radar, filtros, score configurable y decisiones de escalamiento varietal.','Dirección'],
     ['operativo','🧠','Tablero Operativo','Seguimiento semanal de ensayos, resultados técnicos, técnicos responsables y fugas hacia pipeline.','Dirección'],
+    ['agente','🤖','Agente RICO','Puente estratégico: exportables, brief ejecutivo, análisis de archivos y conexión segura con IA.','Dirección'],
     ['calidad','🧭','Auditoría del Sistema','Motor de calidad de datos, conexiones faltantes, redundancias y reglas de control.','Sistema'],
     ['exportar','📤','Exportar / Respaldo','Exportación, importación, datos demo y mantenimiento del sistema local.','Sistema']
   ];
   const stages=['Lead','Contacto','Demo/Ensayo','Cotización','Orden','Entrega','Factura','Cobrado'];
-  const state={page:'dashboard',sub:{campo:'ensayos',eventos:'score',cartera:'cuentas',sop:'planeacion'},editing:{},map:null,intel:{filters:{cultivo:'',region:'',estado:'',variedad:''},radarVariedad:''}};
+  const state={page:'dashboard',sub:{campo:'ensayos',eventos:'score',cartera:'cuentas',sop:'planeacion'},editing:{},map:null,intel:{filters:{cultivo:'',region:'',estado:'',variedad:''},radarVariedad:''},rico:{agentUrl:'https://chatgpt.com/g/g-69c48b8fea648191a692f9fcc74e6455-agente-rico'}};
   const $=id=>document.getElementById(id);
   const qa=(sel,root=document)=>Array.from(root.querySelectorAll(sel));
   const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
@@ -151,7 +154,7 @@ const APP = (()=>{
     render(); window.scrollTo({top:0,behavior:'smooth'});
   }
   function sub(prefix,name){ state.sub[prefix]=name; render(); }
-  function render(){ const f={dashboard:renderDashboard,campo:renderCampo,eventos:renderEventos,pipeline:renderPipeline,sop:renderSOP,cartera:renderCartera,inteligencia:renderInteligencia,operativo:renderOperativo,calidad:renderCalidad,exportar:renderExportar}[state.page]; if(f) f(); }
+  function render(){ const f={dashboard:renderDashboard,campo:renderCampo,eventos:renderEventos,pipeline:renderPipeline,sop:renderSOP,cartera:renderCartera,inteligencia:renderInteligencia,operativo:renderOperativo,agente:renderAgenteRICO,calidad:renderCalidad,exportar:renderExportar}[state.page]; if(f) f(); }
 
   function latestResultsByTrial(){ const out={}; read(K.results).forEach(r=>{if(!r.trialId)return; if(!out[r.trialId]||String(r.fecha)>String(out[r.trialId].fecha)) out[r.trialId]=r}); return out; }
   function resultCalcFromForm(prefix='res_'){
@@ -533,13 +536,176 @@ const APP = (()=>{
   function roiByTechnicianRows(d,latest){ const by={}; d.trials.forEach(t=>{const key=t.tecnico||'Sin técnico'; const r=latest[t.id]; const x=by[key]||(by[key]={trials:0,done:0,roi:[],mejora:[],tec:[]}); x.trials++; if(t.estado==='Terminado')x.done++; if(r){x.roi.push(r.roiPct); x.mejora.push(r.mejoraPct); x.tec.push(resultTechnicalScore(r));}}); return Object.entries(by).filter(([_,x])=>x.roi.length).sort((a,b)=>avg(b[1].roi)-avg(a[1].roi)).map(([tec,x])=>`<tr><td>${esc(tec)}</td><td>${int(x.trials)}</td><td>${int(x.done)}</td><td>${pct(avg(x.roi))}</td><td>${pct(avg(x.mejora))}</td><td>${avg(x.tec)?pct(avg(x.tec),0):'N/D'}</td><td>${avg(x.roi)>=30?pill('Documentar receta','green'):avg(x.roi)>=0?pill('Ajustar variables','yellow'):pill('Revisar o detener','red')}</td></tr>`); }
   function cycleComparison(d,latest){ const groups={}; d.trials.forEach(t=>{const key=t.ciclo||((t.siembra||'').slice(0,4))||'Sin ciclo'; const date=t.siembra||t.fechaAlta||''; const x=groups[key]||(groups[key]={key,trials:[],date:''}); x.trials.push(t); if(date>x.date)x.date=date;}); const arr=Object.values(groups).sort((a,b)=>String(b.date||b.key).localeCompare(String(a.date||a.key))); if(arr.length<2)return '<p class="muted"><i>No hay suficiente información para comparar ciclos.</i></p>'; const rows=arr.slice(0,2).map(g=>{const res=g.trials.map(t=>latest[t.id]).filter(Boolean); const leads=g.trials.flatMap(t=>d.leads.filter(l=>eq(l.trialId,t.id))); return `<tr><td>${esc(g.key)}</td><td>${int(g.trials.length)}</td><td>${pct(avg(res.map(r=>r.roiPct)))}</td><td>${pct(avg(res.map(r=>r.mejoraPct)))}</td><td>${int(leads.length)}</td><td>${money(sum(leads.filter(leadIsClosed).map(l=>l.ticket)))}</td></tr>`;}); return table(['Ciclo','Ensayos','ROI prom.','Mejora prom.','Leads','Ventas cobradas'],rows); }
 
+
+  function ricoDataPackage(){
+    const d=data();
+    const dash=calcDashboard();
+    const q=qualityAudit();
+    const portfolio=varietalPortfolio().map(x=>({
+      variedad:x.variedad,
+      cultivos:[...x.cultivos],
+      regiones:[...x.regions],
+      benchmarks:[...x.benchmarks].filter(Boolean),
+      ensayos:x.trials,
+      mejoraPromedio:avg(x.mejora),
+      roiPromedio:avg(x.roi),
+      ventasCobradas:x.sales,
+      pipeline:x.pipeline,
+      adopcionScore:x.adopcionScore,
+      scoreTecnico:x.technicalScore,
+      score:x.score,
+      estatus:x.status,
+      decision:x.decision
+    }));
+    return {
+      paquete:'Galera RICO → Agente RICO',
+      version:'2.7',
+      generado:now(),
+      objetivo:'Analizar operación, ensayos, eventos, pipeline, S&OP, cartera e innovación varietal para recomendar estrategia RICO accionable.',
+      resumen:{
+        saludSistema:dash.quality.score,
+        alertas:dash.quality.alerts.length,
+        ensayos:d.trials.length,
+        ensayosActivos:d.trials.filter(t=>t.estado==='Activo').length,
+        ensayosTerminados:d.trials.filter(t=>t.estado==='Terminado').length,
+        resultados:d.results.length,
+        roiPromedioEnsayos:dash.roiTrials,
+        conversionEnsayoVenta:dash.trialConversion,
+        eventos:d.events.length,
+        roiPromedioEventos:dash.eventRoi,
+        leads:d.leads.length,
+        conversionLeadOrden:dash.leadToOrder,
+        dosToquesSieteDias:dash.twoTouches,
+        fillRate:dash.sop.fillRate,
+        stockouts:dash.sop.stockouts,
+        dso:dash.cartera.dso,
+        cartera60Mas:dash.cartera.pct60
+      },
+      alertas:q.alerts.slice(0,25),
+      portafolio_varietal:portfolio,
+      datos:{
+        ensayos:d.trials,
+        bitacora:d.evidence,
+        resultados:d.results,
+        eventos:d.events,
+        leads_pipeline:d.leads,
+        demanda_sop:d.demand,
+        inventario:d.inventory,
+        cartera:d.accounts,
+        scoring:d.scores
+      }
+    };
+  }
+  function ricoPromptText(){
+    const pkg=ricoDataPackage();
+    const p=pkg.resumen;
+    const topAlerts=(pkg.alertas||[]).slice(0,10).map((a,i)=>`${i+1}. [${a.sev}] ${a.area}: ${a.msg} | Acción: ${a.action}`).join('\n') || 'Sin alertas relevantes.';
+    const topPortfolio=(pkg.portafolio_varietal||[]).slice(0,8).map((x,i)=>`${i+1}. ${x.variedad}: score ${dec(x.score,0)}%, ROI ${dec(x.roiPromedio,1)}%, mejora ${dec(x.mejoraPromedio,1)}%, ventas ${money(x.ventasCobradas)}, estatus ${x.estatus}, decisión: ${x.decision}`).join('\n') || 'Sin portafolio varietal suficiente.';
+    return `Actúa como Agente RICO experto en agroindustria, dealers de semillas, eficiencia comercial, S&OP, cartera, ensayos, eventos, pipeline e innovación varietal.
+
+Necesito una estrategia ejecutiva accionable para Semillas Galera usando los exportables o datos del sistema Galera RICO.
+
+OBJETIVO DEL ANÁLISIS
+1) Detectar fugas comerciales y operativas.
+2) Priorizar ensayos, variedades, eventos, leads, cartera e inventario.
+3) Recomendar qué escalar, repetir, ajustar, detener, comprar, bloquear o cobrar.
+4) Proponer un plan 30/60/90 días con responsables, KPIs y reglas de control.
+5) Separar hallazgos técnicos, comerciales, financieros y de dirección.
+
+RESUMEN ACTUAL DEL SISTEMA
+- Salud del sistema: ${dec(p.saludSistema,0)}%
+- Ensayos: ${p.ensayos} total | ${p.ensayosActivos} activos | ${p.ensayosTerminados} terminados
+- Resultados cargados: ${p.resultados}
+- ROI promedio ensayos: ${dec(p.roiPromedioEnsayos,1)}%
+- Conversión ensayo→venta: ${dec(p.conversionEnsayoVenta,1)}%
+- Eventos: ${p.eventos} | ROI promedio eventos: ${dec(p.roiPromedioEventos,1)}%
+- Leads: ${p.leads} | Conversión lead→orden: ${dec(p.conversionLeadOrden,1)}%
+- 2 toques / 7 días: ${dec(p.dosToquesSieteDias,1)}%
+- Fill-rate: ${dec(p.fillRate,1)}% | Stockouts: ${p.stockouts}
+- DSO estimado: ${dec(p.dso,0)} días | Cartera 60+: ${dec(p.cartera60Mas,1)}%
+
+ALERTAS PRINCIPALES
+${topAlerts}
+
+PORTAFOLIO VARIETAL PRINCIPAL
+${topPortfolio}
+
+INSTRUCCIONES DE RESPUESTA
+- Entrega primero un diagnóstico ejecutivo claro.
+- Después una tabla de prioridades: impacto, urgencia, esfuerzo, dueño sugerido y KPI.
+- Incluye estrategia por variedad: escalar / validar / repetir / ajustar / descartar.
+- Incluye estrategia comercial: pipeline, eventos, leads, demos y recetas comerciales.
+- Incluye estrategia financiera: cartera, bloqueos, cobranza, crédito y comisiones ligadas a cobro.
+- Incluye estrategia S&OP: inventario, compras, stockouts, cobertura y forecast.
+- Cierra con plan 30/60/90 días y reglas anti-dispersión.
+
+Adjunto o adjuntaré el Excel integral/JSON del sistema para análisis completo.`;
+  }
+  function renderAgenteRICO(){
+    const pkg=ricoDataPackage(), p=pkg.resumen;
+    $('page-agente').innerHTML=`
+      <div class="card"><div class="section-title"><div><h2>🤖 Puente con Agente RICO</h2><p class="muted">Este módulo convierte la información capturada en un paquete listo para análisis estratégico. El modo inmediato abre tu GPT y genera el brief; el modo avanzado requiere un endpoint backend seguro.</p></div>${pill('Estrategia asistida por IA','purple')}</div>
+        <div class="grid-3">
+          <div class="notice info"><b>1) Uso inmediato</b><br>Genera brief + Excel/JSON, abre el Agente RICO y arrastra los archivos exportados al chat.</div>
+          <div class="notice info"><b>2) Análisis de exportables</b><br>Sube aquí un Excel/JSON para validar estructura y preparar un prompt de análisis.</div>
+          <div class="notice warn"><b>3) Integración API real</b><br>No expongas llaves en este HTML. Usa un backend seguro y conecta este módulo por endpoint.</div>
+        </div>
+        <div class="actions"><button class="btn-primary" onclick="APP.generateRicoBrief()">🧠 Generar brief estratégico</button><button class="btn-success" onclick="APP.exportWorkbook()">📤 Exportar Excel integral</button><button class="btn-secondary" onclick="APP.exportRicoJSON()">💾 Exportar paquete JSON</button><button class="btn-purple" onclick="APP.openRicoAgent()">Abrir Agente RICO</button></div>
+      </div>
+      <div class="card"><div class="section-title"><h2>Resumen listo para Agente RICO</h2>${pill('Datos vivos del sistema','blue')}</div>
+        <div class="kpi-grid">${kpi('Salud sistema',pct(p.saludSistema,0),`${p.alertas} alertas`,clsScore(p.saludSistema,80,60))}${kpi('Ensayos',int(p.ensayos),`${p.ensayosActivos} activos · ${p.ensayosTerminados} terminados`,'info')}${kpi('ROI ensayos',pct(p.roiPromedioEnsayos),'Promedio últimos resultados',p.roiPromedioEnsayos>=30?'good':p.roiPromedioEnsayos>=0?'warn':'bad')}${kpi('Ensayo → venta',pct(p.conversionEnsayoVenta),'Meta ≥25%',p.conversionEnsayoVenta>=25?'good':'warn')}${kpi('Lead → orden',pct(p.conversionLeadOrden),'Meta ≥20%',p.conversionLeadOrden>=20?'good':'warn')}${kpi('DSO',dec(p.dso,0)+' días',`Cartera 60+: ${pct(p.cartera60Mas)}`,p.dso<=45?'good':p.dso<=60?'warn':'bad')}</div>
+        <label>Brief / prompt estratégico</label><textarea id="ricoBrief" style="min-height:330px">${esc(ricoPromptText())}</textarea>
+        <div class="actions"><button class="btn-primary" onclick="APP.copyRicoBrief()">📋 Copiar brief</button><button class="btn-secondary" onclick="APP.downloadRicoBrief()">⬇️ Descargar .txt</button></div>
+      </div>
+      <div class="split">
+        <div class="card"><div class="section-title"><h2>📎 Analizador de exportables</h2>${pill('Excel / JSON','blue')}</div><p class="muted">Sirve para revisar un exportable antes de llevarlo al Agente RICO. No modifica datos locales.</p><input type="file" id="ricoFile" accept=".xlsx,.xls,.json,application/json"><div class="actions"><button class="btn-primary" onclick="APP.previewRicoFile()">Analizar archivo</button></div><div id="ricoFilePreview" class="notice info">Sin archivo analizado.</div></div>
+        <div class="card"><div class="section-title"><h2>🔌 Conexión API opcional</h2>${pill('Backend seguro','yellow')}</div><p class="muted">Para integración directa, crea un endpoint propio que reciba este paquete y llame a OpenAI desde servidor. El endpoint puede devolver diagnóstico, estrategia y plan 30/60/90.</p><label>URL endpoint backend</label><input id="ricoEndpoint" placeholder="https://tu-dominio.com/api/agente-rico"><label>Objetivo de análisis</label><select id="ricoObjective"><option>Estrategia integral 30/60/90</option><option>Priorizar portafolio varietal</option><option>Detectar fugas comerciales</option><option>Auditar cartera, crédito y cobranza</option><option>Optimizar S&OP e inventario</option></select><div class="actions"><button class="btn-warning" onclick="APP.sendRicoToEndpoint()">Enviar paquete al endpoint</button></div><div id="ricoEndpointResult" class="notice warn">Pendiente de endpoint. No pongas API keys en el navegador.</div></div>
+      </div>
+      <div class="card"><h2>Arquitectura recomendada</h2><div class="grid-3"><div class="notice good"><b>Opción A — Segura e inmediata</b><br>Sistema exporta → usuario sube al GPT → GPT entrega estrategia.</div><div class="notice info"><b>Opción B — GPT Actions</b><br>El Agente RICO llama APIs del sistema para leer KPIs y generar recomendaciones.</div><div class="notice info"><b>Opción C — API propia</b><br>Tu código llama un backend con OpenAI API y regresa estrategia dentro del sistema.</div></div></div>`;
+  }
+  function generateRicoBrief(){ const el=$('ricoBrief'); if(el){el.value=ricoPromptText(); toast('Brief RICO actualizado');} }
+  function copyRicoBrief(){ const el=$('ricoBrief'); if(!el)return; el.select(); el.setSelectionRange(0,999999); try{navigator.clipboard.writeText(el.value).then(()=>toast('Brief copiado'));}catch(e){document.execCommand('copy'); toast('Brief copiado');} }
+  function downloadRicoBrief(){ const txt=($('ricoBrief')?.value)||ricoPromptText(); downloadBlob('Brief_Agente_RICO_Galera_'+today()+'.txt',txt,'text/plain;charset=utf-8'); }
+  function exportRicoJSON(){ downloadBlob('Paquete_Agente_RICO_Galera_'+today()+'.json',JSON.stringify(ricoDataPackage(),null,2),'application/json'); }
+  function openRicoAgent(){ window.open(state.rico.agentUrl,'_blank','noopener'); }
+  function previewRicoFile(){
+    const file=$('ricoFile')?.files?.[0], out=$('ricoFilePreview'); if(!file||!out){alert('Selecciona un archivo Excel o JSON.');return;}
+    const isJson=file.name.toLowerCase().endsWith('.json');
+    const reader=new FileReader();
+    reader.onload=e=>{
+      try{
+        if(isJson){
+          const obj=JSON.parse(e.target.result); const datos=obj.datos||obj; const rows=Object.entries(datos).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${Array.isArray(v)?int(v.length):typeof v}</td><td>${Array.isArray(v)&&v[0]?esc(Object.keys(v[0]).slice(0,12).join(', ')):'—'}</td></tr>`);
+          out.innerHTML=`<b>JSON reconocido:</b> ${esc(file.name)}${table(['Bloque','Registros','Campos detectados'],rows)}`;
+        }else{
+          const wb=XLSX.read(e.target.result,{type:'array'}); const rows=wb.SheetNames.map(name=>{ const data=XLSX.utils.sheet_to_json(wb.Sheets[name],{defval:''}); const headers=data[0]?Object.keys(data[0]).slice(0,14).join(', '):''; return `<tr><td>${esc(name)}</td><td>${int(data.length)}</td><td>${esc(headers||'Sin encabezados')}</td></tr>`; });
+          out.innerHTML=`<b>Excel reconocido:</b> ${esc(file.name)}${table(['Hoja','Registros','Campos detectados'],rows)}`;
+        }
+        const el=$('ricoBrief'); if(el) el.value=ricoPromptText()+`\n\nNOTA: Analiza también el archivo exportable "${file.name}" que se adjuntará en el Agente RICO.`;
+      }catch(err){ out.className='notice bad'; out.textContent='No se pudo leer el archivo: '+err.message; }
+    };
+    if(isJson) reader.readAsText(file); else reader.readAsArrayBuffer(file);
+  }
+  async function sendRicoToEndpoint(){
+    const endpoint=field('ricoEndpoint'), out=$('ricoEndpointResult'); if(!endpoint){alert('Captura la URL del endpoint backend.');return;}
+    if(out){out.className='notice info'; out.textContent='Enviando paquete al endpoint...';}
+    try{
+      const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({objective:field('ricoObjective'),brief:($('ricoBrief')?.value)||ricoPromptText(),package:ricoDataPackage()})});
+      const txt=await res.text();
+      if(out){out.className=res.ok?'notice good':'notice bad'; out.innerHTML=`<b>Respuesta ${res.status}:</b><br><pre style="white-space:pre-wrap">${esc(txt).slice(0,5000)}</pre>`;}
+    }catch(err){ if(out){out.className='notice bad'; out.textContent='Error de conexión: '+err.message+' — revisa CORS, URL y backend.';} }
+  }
+  function downloadBlob(filename,content,type='application/octet-stream'){
+    const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+
   function renderCalidad(){ const q=qualityAudit(); $('page-calidad').innerHTML=`<div class="kpi-grid">${kpi('Calidad de datos',pct(q.score,0),'100 = sistema conectado',clsScore(q.score,80,60))}${kpi('Alertas críticas',int(q.alerts.filter(a=>a.sev==='bad').length),'Acción inmediata','bad')}${kpi('Alertas preventivas',int(q.alerts.filter(a=>a.sev==='warn').length),'Revisar en comité','warn')}</div><div class="card"><h2>Reglas anti-dispersión del sistema</h2><div class="notice info"><b>Todo ensayo debe tener:</b> objetivo medible, control, proveedor/control, productor, ubicación, evidencia, costo, resultado económico, vínculo comercial y salida de mercado. Si pasa 60 días activo sin evidencia, se marca como alerta.</div><hr><div class="badge-row">${pill('Sin evidencia = inválido','red')}${pill('ROI negativo = no repetir','red')}${pill('Exitoso = receta comercial','green')}${pill('Terminado sin lead = fuga','yellow')}${pill('Sin mercado objetivo = dato incompleto','yellow')}</div></div><div class="card"><h2>Hallazgos de auditoría</h2>${q.alerts.map(a=>`<div class="notice ${a.sev}"><b>${esc(a.area)}:</b> ${esc(a.msg)}<br><span class="small">Acción sugerida: ${esc(a.action)}</span></div>`).join('')||'<div class="notice good">Sin hallazgos relevantes.</div>'}</div><div class="card"><h2>Variables depuradas y coherencia</h2><div class="grid-2"><div class="notice info"><b>ROI único:</b> todo ROI se calcula como porcentaje: (margen incremental – costo) / costo × 100.</div><div class="notice info"><b>Producción adicional:</b> diferencia ton/ha × 1,000 × hectáreas evaluadas.</div><div class="notice info"><b>Pipeline único:</b> eventos, ensayos y leads manuales entran al mismo embudo.</div><div class="notice info"><b>Resultado completo:</b> solo es completo cuando llega a cobro, no solo a factura.</div></div></div>`; }
   function renderExportar(){ $('page-exportar').innerHTML=`
     <div class="card"><div class="section-title"><div><h2>📥 Centro de importación Excel</h2><p class="muted">Para datos que vienen de AppSheet, ERP, CRM, Excel de campo u otro software. Primero descarga la plantilla guía, conserva encabezados y luego importa. El sistema fusiona sin duplicar por ID, folio externo, no. externo o combinación cultivo-productor-variedad-fecha.</p></div>${pill('Importador inteligente','blue')}</div>
       <div class="grid-4"><div><label>Archivo Excel</label><input type="file" id="excelImport" accept=".xlsx,.xls"></div><div><label>Modo</label><select id="excelImportMode"><option value="preview">Solo previsualizar</option><option value="merge">Fusionar sin duplicar</option></select></div><div><label>Plantilla guía</label><button class="btn-secondary" onclick="APP.downloadImportTemplate()">📄 Descargar formato</button></div><div><label>Acción</label><button class="btn-success" onclick="APP.importExcel()">Importar / previsualizar</button></div></div>
       <div id="excelImportResult" class="notice info" style="margin-top:12px">Sin archivo importado en esta sesión. Hojas reconocidas: ENSAYOS, BITACORA, RESULTADOS, EVENTOS, LEADS_PIPELINE, DEMANDA_SOP, INVENTARIO, CARTERA y SCORING.</div>
     </div>
-    <div class="grid-2"><div class="card"><h2>Exportar</h2><p class="muted">Descarga datos en Excel o respaldo JSON.</p><div class="actions"><button class="btn-success" onclick="APP.exportWorkbook()">📤 Excel integral</button><button class="btn-secondary" onclick="APP.exportJSON()">💾 Respaldo JSON</button><button class="btn-primary" onclick="APP.printReport()">🖨 Reporte PDF / imprimir</button></div></div><div class="card"><h2>JSON / demo / migración</h2><p class="muted">Puedes cargar datos demo, importar un JSON exportado por este sistema o migrar registros locales de versiones anteriores.</p><input type="file" id="jsonImport" accept="application/json"><div class="actions"><button class="btn-primary" onclick="APP.importJSON()">Importar JSON</button><button class="btn-warning" onclick="APP.seedDemo()">Cargar demo</button><button class="btn-danger" onclick="APP.clearAll()">Borrar datos v2</button><button class="btn-secondary" onclick="APP.migrateOld()">Migrar datos anteriores</button></div></div></div><div class="card"><h2>Checklist de uso semanal</h2><div class="notice info">Lunes: revisar dashboard y cartera. Miércoles: seguimiento leads y eventos. Viernes: ensayos, evidencia, S&OP y decisiones de compra/promoción.</div></div>`; }
+    <div class="grid-2"><div class="card"><h2>Exportar</h2><p class="muted">Descarga datos en Excel o respaldo JSON.</p><div class="actions"><button class="btn-success" onclick="APP.exportWorkbook()">📤 Excel integral</button><button class="btn-secondary" onclick="APP.exportJSON()">💾 Respaldo JSON</button><button class="btn-primary" onclick="APP.printReport()">🖨 Reporte PDF / imprimir</button><button class="btn-purple" onclick="APP.show('agente')">🤖 Enviar a Agente RICO</button></div></div><div class="card"><h2>JSON / demo / migración</h2><p class="muted">Puedes cargar datos demo, importar un JSON exportado por este sistema o migrar registros locales de versiones anteriores.</p><input type="file" id="jsonImport" accept="application/json"><div class="actions"><button class="btn-primary" onclick="APP.importJSON()">Importar JSON</button><button class="btn-warning" onclick="APP.seedDemo()">Cargar demo</button><button class="btn-danger" onclick="APP.clearAll()">Borrar datos v2</button><button class="btn-secondary" onclick="APP.migrateOld()">Migrar datos anteriores</button></div></div></div><div class="card"><h2>Checklist de uso semanal</h2><div class="notice info">Lunes: revisar dashboard y cartera. Miércoles: seguimiento leads y eventos. Viernes: ensayos, evidencia, S&OP y decisiones de compra/promoción.</div></div>`; }
 
   function importTemplateSpecs(){ return {
     ENSAYOS:{headers:['ID Ensayo','Folio externo Galera','No. ensayo externo','Fuente captura','Cultivo','Variedad Galera','Casa comercial','Variedad control','Proveedor control','Productor','Cliente / cuenta objetivo','Técnico responsable','Responsable comercial','Región','Estado geográfico','Municipio','GPS','Ciclo agrícola','Sistema','Condición de cultivo','Densidad plantas/ha','Suelo','Riego','Fecha siembra','Fecha cosecha estimada','Superficie ha','Tipo de ensayo Galera','Estado','Prioridad','Vínculo comercial','Mercado objetivo','Segmento objetivo','Competidor objetivo','Área potencial ha','Ticket potencial','Objetivo medible','Criterio éxito','Problema / hipótesis','Salida comercial esperada'],sample:['ENS-001','GAL-2026-001','EXT-101','AppSheet','Tomate','Dumas','Enza Zaden','Variedad actual productor','Competidor local','Agrícola San Miguel','Agrícola San Miguel','Ing. Ramos','Comercial Norte','Sinaloa Norte','Sinaloa','Culiacán','24.8091, -107.3940','Primavera 2026','Campo abierto','Bueno / Campo abierto',80000,'Franco','Goteo','2026-02-10','2026-05-20',0.5,'Comparativo control vs tratado','Activo','Alta','Sí','Productores tomate exportación','Productor mediano-alto','Variedad actual productor',18,380000,'+12% rendimiento vs control','ROI ≥30% y calibre exportable','Mayor uniformidad y rendimiento.','Receta comercial y demo privada']},
@@ -760,7 +926,7 @@ const APP = (()=>{
 
   function init(){ buildNav(); migrateOldSilently(); show('dashboard'); }
   function migrateOldSilently(){ if(read(K.trials).length)return; try{const old=JSON.parse(localStorage.getItem('ensayos')||'[]'); if(old.length){write(K.trials,old.map(mapOldTrial));}}catch(e){} }
-  return {init,show,sub,render,applyIntelFilters,clearIntelFilters,applyIntelPreset,saveIntelWeights,resetIntelWeights,changeRadarVar,saveTrial,saveEvidence,prefillResult,previewResult,saveResult,createLeadFromTrial,printRecipe,previewEvent,saveEvent,saveLead,savePost,quickLead,saveDemand,saveInventory,previewScore,saveScore,saveAccount,edit,cancelEdit,remove,exportWorkbook,exportSheet,exportJSON,importJSON,downloadImportTemplate,importExcel,clearAll,printReport,seedDemo,migrateOld};
+  return {init,show,sub,render,applyIntelFilters,clearIntelFilters,applyIntelPreset,saveIntelWeights,resetIntelWeights,changeRadarVar,generateRicoBrief,copyRicoBrief,downloadRicoBrief,exportRicoJSON,openRicoAgent,previewRicoFile,sendRicoToEndpoint,saveTrial,saveEvidence,prefillResult,previewResult,saveResult,createLeadFromTrial,printRecipe,previewEvent,saveEvent,saveLead,savePost,quickLead,saveDemand,saveInventory,previewScore,saveScore,saveAccount,edit,cancelEdit,remove,exportWorkbook,exportSheet,exportJSON,importJSON,downloadImportTemplate,importExcel,clearAll,printReport,seedDemo,migrateOld};
 })();
 document.addEventListener('DOMContentLoaded',APP.init);
 </script>
