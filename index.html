@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Galera RICO v2.8 — Sistema Integral Dealer Semillas + Agente RICO</title>
+<title>Galera RICO v3.1 — Executive Agro UI · Sistema Integral Dealer Semillas + Agente RICO</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -49,15 +49,218 @@ a{color:var(--primary)}
 .section-title{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}.split{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}.progress{height:9px;background:#0b1220;border:1px solid var(--line);border-radius:999px;overflow:hidden}.progress span{display:block;height:100%;background:var(--primary);width:0}.stagebar{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin:6px 0}.stagebar span{height:8px;background:#0b1220;border:1px solid var(--line);border-radius:4px}.stagebar span.on{background:var(--primary)}
 .map{height:380px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#0b1220}.svg-box{background:#0b1220;border:1px solid var(--line);border-radius:16px;padding:12px;overflow:auto}.svg-box svg{max-width:100%;height:auto;display:block;margin:auto}.score-row{display:grid;grid-template-columns:210px 1fr 44px;gap:10px;align-items:center;margin-bottom:10px}.score-row input{padding:0}.badge-row{display:flex;gap:8px;flex-wrap:wrap}.empty{padding:24px;text-align:center;color:var(--muted)}
 .toast{position:fixed;right:20px;bottom:20px;background:#0b1220;color:var(--text);border:1px solid var(--line);padding:12px 15px;border-radius:14px;box-shadow:var(--shadow);z-index:9999;opacity:0;transform:translateY(12px);transition:.25s}.toast.show{opacity:1;transform:translateY(0)}
+.quick-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:16px;background:rgba(11,18,32,.72)}
+.table-wrap{position:relative}.table-wrap:after{content:'Desliza horizontalmente para ver más columnas →';display:block;color:var(--muted);font-size:11px;padding:8px 10px;background:#0b1220;border-top:1px solid var(--line)}
+td:last-child,th:last-child{position:sticky;right:0;background:#0b1220;z-index:2;box-shadow:-8px 0 12px rgba(0,0,0,.18)}
+.breadcrumb{font-size:12px;color:var(--muted);margin:-7px 0 13px}.breadcrumb b{color:var(--primary)}
+.stepper{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.stepper .step{border:1px solid var(--line);border-radius:16px;padding:12px;background:#0b1220}.stepper .step b{color:var(--primary)}
+.form-guide{border:1px dashed rgba(56,189,248,.45);background:rgba(56,189,248,.08);border-radius:16px;padding:12px;margin:10px 0}.form-guide summary{cursor:pointer;font-weight:1000;color:var(--primary)}
+@media(max-width:1280px){.grid-5{grid-template-columns:repeat(3,minmax(0,1fr))}.main{padding:18px}.card{padding:15px}.kpi .value{font-size:21px}}
+.toast.good{border-left:4px solid var(--green)}.toast.bad{border-left:4px solid var(--red)}.toast.warn{border-left:4px solid var(--yellow)}
+
 @media(max-width:1080px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.sidebar .nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:4px}.nav-title{grid-column:1/-1}.main{padding:14px}.split,.grid-2,.grid-3,.grid-4,.grid-5{grid-template-columns:1fr}.actions button{width:100%}.score-row{grid-template-columns:1fr}.top-actions{width:100%}.top-actions button{width:100%}.stagebar{grid-template-columns:repeat(4,1fr)}}
 @media print{body{background:white;color:#111}.sidebar,.top-actions,.actions,.tabs{display:none!important}.app{display:block}.main{padding:0}.card,.kpi{box-shadow:none;border-color:#ccc;background:white;color:#111}.page{display:block!important}}
+
+
+/* =====================================================
+   GALERA RICO v3.1 — EXECUTIVE AGRO UI
+   Diseño híbrido: operación clara + navegación ejecutiva oscura
+   ===================================================== */
+:root{
+  --bg:#f3f6fb;
+  --shell:#0b1220;
+  --card:#ffffff;
+  --card2:#f8fafc;
+  --line:#d6dee9;
+  --soft:#e8eef7;
+  --text:#0f172a;
+  --muted:#64748b;
+  --primary:#0ea5e9;
+  --primary2:#0284c7;
+  --green:#16a34a;
+  --yellow:#eab308;
+  --orange:#f59e0b;
+  --red:#dc2626;
+  --purple:#7c3aed;
+  --teal:#0f766e;
+  --shadow:0 18px 46px rgba(15,23,42,.08);
+  --radius:18px;
+}
+body{
+  background:
+    radial-gradient(circle at 18% -6%,rgba(14,165,233,.16) 0%,rgba(14,165,233,0) 30%),
+    radial-gradient(circle at 90% 0%,rgba(15,118,110,.13) 0%,rgba(15,118,110,0) 34%),
+    linear-gradient(180deg,#f8fafc 0%,#eef3f9 100%);
+  color:var(--text);
+}
+.app{background:transparent;}
+.sidebar{
+  background:linear-gradient(180deg,#08111f 0%,#0b1220 48%,#07101b 100%);
+  border-right:1px solid #1e293b;
+  box-shadow:8px 0 28px rgba(15,23,42,.12);
+}
+.brand{
+  border:1px solid rgba(148,163,184,.20);
+  background:linear-gradient(145deg,rgba(14,165,233,.16),rgba(15,118,110,.12));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+}
+.brand h1{color:#e0f2fe;}
+.brand p{color:#a8b7ca;}
+.theme-tag{
+  display:inline-block;
+  margin-top:10px!important;
+  padding:5px 9px;
+  border-radius:999px;
+  border:1px solid rgba(14,165,233,.26);
+  background:rgba(14,165,233,.10);
+  color:#bae6fd!important;
+  font-size:11px!important;
+  font-weight:900;
+}
+.nav-title{color:#7f8ea3;}
+.nav button{color:#a8b7ca;}
+.nav button.active,.nav button:hover{
+  background:linear-gradient(90deg,rgba(14,165,233,.16),rgba(15,118,110,.10));
+  color:#f8fafc;
+  border-left-color:#38bdf8;
+}
+.main{max-width:1580px;}
+.topbar{
+  background:linear-gradient(135deg,#0b1220 0%,#0f2743 54%,#0f3d38 100%);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 18px 42px rgba(15,23,42,.18);
+}
+.topbar h2{color:#f8fafc;}
+.topbar p{color:#cbd5e1;}
+.card{
+  background:rgba(255,255,255,.96);
+  color:var(--text);
+  border:1px solid var(--line);
+  box-shadow:var(--shadow);
+}
+.card h2{color:#075985;}
+.card h3{color:#0f766e;}
+input,select,textarea{
+  background:#ffffff;
+  color:#0f172a;
+  border:1px solid #cbd5e1;
+  box-shadow:inset 0 1px 0 rgba(15,23,42,.03);
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 4px rgba(14,165,233,.13);
+}
+label{color:#475569;}
+a{color:#0369a1;}
+.btn-primary{background:linear-gradient(180deg,#0ea5e9,#0284c7);color:#ffffff;}
+.btn-success{background:linear-gradient(180deg,#22c55e,#16a34a);color:#ffffff;}
+.btn-warning{background:#f59e0b;color:#111827;}
+.btn-danger{background:#dc2626;color:#ffffff;}
+.btn-purple{background:linear-gradient(180deg,#8b5cf6,#7c3aed);color:#ffffff;}
+.btn-secondary,.btn-ghost{background:#ffffff;color:#0f172a;border:1px solid #cbd5e1;}
+button:hover{filter:none;box-shadow:0 9px 20px rgba(15,23,42,.12);}
+.kpi{
+  background:linear-gradient(180deg,#ffffff,#f8fafc);
+  border:1px solid #dbe4ee;
+  box-shadow:0 8px 22px rgba(15,23,42,.05);
+}
+.kpi .label{color:#64748b;}
+.kpi .value{color:#0f172a;}
+.kpi .sub{color:#64748b;}
+.kpi.good{border-left:5px solid var(--green);}
+.kpi.warn{border-left:5px solid var(--yellow);}
+.kpi.bad{border-left:5px solid var(--red);}
+.kpi.info{border-left:5px solid var(--primary);}
+.notice{
+  background:#f8fafc;
+  color:#0f172a;
+  border:1px solid #dbe4ee;
+}
+.notice.info{background:#eff8ff;border-left:5px solid var(--primary);}
+.notice.good{background:#f0fdf4;color:#14532d;border-left:5px solid var(--green);}
+.notice.warn{background:#fffbeb;color:#713f12;border-left:5px solid var(--yellow);}
+.notice.bad{background:#fef2f2;color:#7f1d1d;border-left:5px solid var(--red);}
+.table-wrap{
+  background:#ffffff;
+  border:1px solid #dbe4ee;
+  box-shadow:0 8px 20px rgba(15,23,42,.04);
+}
+table{background:#ffffff;}
+th{
+  background:#eef4fb;
+  color:#075985;
+  border-bottom:1px solid #d6dee9;
+}
+td{border-bottom:1px solid #e2e8f0;}
+tr:hover td{background:#f8fafc;}
+td:last-child,th:last-child{background:#f8fafc;}
+.table-wrap:after{
+  background:#f8fafc;
+  color:#64748b;
+  border-top:1px solid #e2e8f0;
+}
+.pill{background:#f8fafc;color:#64748b;border-color:#cbd5e1;}
+.pill.green{color:#15803d;background:#dcfce7;border-color:#86efac;}
+.pill.yellow{color:#854d0e;background:#fef9c3;border-color:#fde68a;}
+.pill.red{color:#991b1b;background:#fee2e2;border-color:#fecaca;}
+.pill.blue{color:#075985;background:#e0f2fe;border-color:#bae6fd;}
+.pill.purple{color:#5b21b6;background:#ede9fe;border-color:#ddd6fe;}
+.tabs button{
+  background:#ffffff;
+  color:#475569;
+  border:1px solid #cbd5e1;
+}
+.tabs button.active{
+  background:linear-gradient(180deg,#0ea5e9,#0284c7);
+  color:#ffffff;
+  border-color:#0284c7;
+}
+.progress{background:#e2e8f0;border:1px solid #cbd5e1;}
+.progress span{background:linear-gradient(90deg,#0ea5e9,#0f766e);}
+.stagebar span{background:#e2e8f0;border:1px solid #cbd5e1;}
+.stagebar span.on{background:linear-gradient(90deg,#0ea5e9,#0f766e);}
+.map,.svg-box{background:#ffffff;border:1px solid #dbe4ee;}
+.quick-filters{
+  background:#f8fafc;
+  border:1px solid #dbe4ee;
+}
+.breadcrumb{color:#64748b;}
+.breadcrumb b{color:#075985;}
+.stepper .step{
+  background:#f8fafc;
+  border:1px solid #dbe4ee;
+  box-shadow:0 8px 18px rgba(15,23,42,.04);
+}
+.stepper .step b{color:#075985;}
+.form-guide{
+  border:1px dashed rgba(14,165,233,.50);
+  background:#eff8ff;
+}
+.form-guide summary{color:#075985;}
+.toast{
+  background:#0b1220;
+  color:#f8fafc;
+  border:1px solid #1e293b;
+}
+.green{color:#15803d}.yellow{color:#ca8a04}.red{color:#dc2626}.blue{color:#0369a1}.muted{color:#64748b;}
+@media(max-width:1080px){
+  .sidebar{background:#0b1220;}
+  .sidebar .nav button{background:rgba(255,255,255,.03)}
+}
+@media print{
+  body{background:#ffffff;color:#000;}
+  .sidebar,.top-actions{display:none!important;}
+  .app{display:block;}
+  .card,.topbar{box-shadow:none;border-color:#cbd5e1;background:#ffffff;color:#000;}
+}
+
 </style>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
     <div class="brand">
-      <h1>🌾 Galera RICO v2.9</h1>
+      <h1>🌾 Galera RICO v3.1</h1>
       <p>Sistema integral para dealer de semillas: campo, eventos, pipeline, S&OP, cartera e inteligencia varietal.</p>
     </div>
     <div class="nav" id="nav"></div>
@@ -66,9 +269,7 @@ a{color:var(--primary)}
     <div class="topbar">
       <div><h2 id="pageTitle">Dashboard Ejecutivo</h2><p id="pageSub">Cada dato debe terminar en una decisión: escalar, ajustar, detener, comprar, cobrar o bloquear.</p></div>
       <div class="top-actions">
-        <button class="btn-secondary" onclick="APP.render()">🔄 Recalcular</button>
         <button class="btn-success" onclick="APP.exportWorkbook()">📤 Exportar Excel</button>
-        <button class="btn-purple" onclick="APP.show('calidad')">🧪 Auditoría</button>
         <button class="btn-primary" onclick="APP.show('agente')">🤖 Agente RICO</button>
       </div>
     </div>
@@ -89,6 +290,7 @@ a{color:var(--primary)}
 <script>
 const APP = (()=>{
   'use strict';
+  const VERSION='3.1';
   const STORE_PREFIX='galera_rico_v2_';
   const K={trials:'trials',evidence:'evidence',results:'results',events:'events',leads:'leads',demand:'demand',inventory:'inventory',accounts:'accounts',scores:'scores',settings:'settings'};
   const pages=[
@@ -100,12 +302,12 @@ const APP = (()=>{
     ['cartera','💳','Cartera & Crédito','Scoring A/B/C, aging, DSO, promesas de pago, bloqueos y recuperación.','Control'],
     ['inteligencia','🚀','Inteligencia Varietal','Portafolio, radar, filtros, score configurable y decisiones de escalamiento varietal.','Dirección'],
     ['operativo','🧠','Tablero Operativo','Seguimiento semanal de ensayos, resultados técnicos, técnicos responsables y fugas hacia pipeline.','Dirección'],
-    ['agente','🤖','Agente RICO','Puente estratégico: exportables, brief ejecutivo, validación de archivos y conexión futura con IA.','Dirección'],
+    ['agente','🤖','Agente RICO','Brief ejecutivo y Excel integral para análisis estratégico con Agente RICO.','Dirección'],
     ['calidad','🧭','Auditoría del Sistema','Motor de calidad de datos, conexiones faltantes, redundancias y reglas de control.','Sistema'],
     ['exportar','📤','Exportar / Respaldo','Exportación, importación, datos demo y mantenimiento del sistema local.','Sistema']
   ];
   const stages=['Lead','Contacto','Demo/Ensayo','Cotización','Orden','Entrega','Factura','Cobrado'];
-  const state={page:'dashboard',sub:{campo:'ensayos',eventos:'score',cartera:'cuentas',sop:'planeacion'},editing:{},map:null,intel:{filters:{cultivo:'',region:'',estado:'',variedad:''},radarVariedad:''},rico:{agentUrl:'https://chatgpt.com/g/g-69c48b8fea648191a692f9fcc74e6455-agente-rico'}};
+  const state={page:'dashboard',sub:{campo:'ensayos',eventos:'score',pipeline:'embudo',cartera:'cuentas',sop:'planeacion'},trialFilters:{q:'',estado:'',cultivo:'',tecnico:''},pipelineFilters:{q:'',stage:'',owner:'',cultivo:''},editing:{},map:null,intel:{filters:{cultivo:'',region:'',estado:'',variedad:''},radarVariedad:''},rico:{agentUrl:'https://chatgpt.com/g/g-69c48b8fea648191a692f9fcc74e6455-agente-rico'}};
   const $=id=>document.getElementById(id);
   const qa=(sel,root=document)=>Array.from(root.querySelectorAll(sel));
   const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
@@ -127,7 +329,13 @@ const APP = (()=>{
   const storeKey=k=>STORE_PREFIX+k;
   const read=k=>{try{return JSON.parse(localStorage.getItem(storeKey(k)))||[]}catch(e){return []}};
   const write=(k,v)=>localStorage.setItem(storeKey(k),JSON.stringify(v));
-  const toast=msg=>{const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);};
+
+  const normalizePercentInput=v=>{ const x=n(v); return x>0 && x<=1 ? x*100 : x; };
+  const leadSLAOK=l=>!!(l&&l.fecha&&l.firstTouch&&l.secondTouch&&daysBetween(l.fecha,l.firstTouch)!==null&&daysBetween(l.fecha,l.firstTouch)<=2&&daysBetween(l.fecha,l.secondTouch)!==null&&daysBetween(l.fecha,l.secondTouch)<=7);
+  const uniqOpts=(arr,current,label)=>`<option value="">${esc(label)}</option>`+[...new Set(arr.filter(Boolean).map(String))].sort().map(v=>`<option value="${esc(v)}" ${eq(v,current)?'selected':''}>${esc(v)}</option>`).join('');
+  function setTrialFilter(k,v){state.trialFilters=state.trialFilters||{};state.trialFilters[k]=v;render();}
+  function setPipeFilter(k,v){state.pipelineFilters=state.pipelineFilters||{};state.pipelineFilters[k]=v;render();}
+  const toast=(msg,type='good')=>{const t=$('toast');t.textContent=msg;t.className='toast '+type+' show';setTimeout(()=>t.classList.remove('show'),type==='bad'?4200:3200);};
   const eq=(a,b)=>String(a||'')===String(b||'');
   const field=id=>($(id)?.value??'').trim();
   const setVal=(id,v)=>{const el=$(id); if(el) el.value=v??'';};
@@ -164,12 +372,14 @@ const APP = (()=>{
     const diffTon=rt-rc, diffKg=diffTon*1000*area;
     const mejoraPct=rc?diffTon/rc*100:0;
     const unitMargin=n(field(prefix+'precioKg'))-n(field(prefix+'costoVariableKg'));
-    const margen=diffKg*unitMargin;
+    const margenBruto=diffKg*unitMargin;
+    const deltaCostoSemilla=(n(field(prefix+'semillaGalera'))||0)-(n(field(prefix+'semillaControl'))||0);
     const costo=n(field(prefix+'semilla'))+n(field(prefix+'insumos'))+n(field(prefix+'materiales'))+n(field(prefix+'horasTec'))*n(field(prefix+'costoHora'))+n(field(prefix+'traslados'))+n(field(prefix+'otros'));
+    const margen=margenBruto-deltaCostoSemilla;
     const roiPct=costo?((margen-costo)/costo)*100:0;
     const evaluacion=roiPct>=30&&mejoraPct>0?'Exitoso':(roiPct>=0||mejoraPct>0?'Parcial':'No exitoso');
     const recomendacion=evaluacion==='Exitoso'?'Escalar / convertir en receta':evaluacion==='Parcial'?'Repetir con ajustes técnicos/comerciales':'Detener o rediseñar antes de repetir';
-    return {areaHa:area,diffTon,diffKg,mejoraPct,unitMargin,margen,costo,roiPct,evaluacion,recomendacion};
+    return {areaHa:area,diffTon,diffKg,mejoraPct,unitMargin,margenBruto,deltaCostoSemilla,margen,costo,roiPct,evaluacion,recomendacion};
   }
   function normalizeEventLevel(v){ v=n(v); if(v>5) v=Math.round(v/4); return clamp(v||3,1,5); }
   function eventScaleText(v){ const map={1:'Muy débil / alto riesgo',2:'Débil',3:'Aceptable',4:'Fuerte',5:'Excelente / listo'}; return map[normalizeEventLevel(v)]||'Aceptable'; }
@@ -203,7 +413,7 @@ const APP = (()=>{
     const d=data(); const latest=latestResultsByTrial(); const resultVals=Object.values(latest); const trialsWithSales=new Set(d.leads.filter(leadIsOrder).map(l=>l.trialId).filter(Boolean));
     const trialConversion=d.trials.length?trialsWithSales.size/d.trials.length*100:0;
     const eventRoi=avg(d.events.map(e=>n(e.roiPct))); const leadToOrder=d.leads.length?d.leads.filter(leadIsOrder).length/d.leads.length*100:0;
-    const twoTouches=d.leads.length?d.leads.filter(l=>l.firstTouch&&l.secondTouch&&daysBetween(l.firstTouch,l.secondTouch)<=7).length/d.leads.length*100:0;
+    const twoTouches=d.leads.length?d.leads.filter(leadSLAOK).length/d.leads.length*100:0;
     const sop=calcSOP(); const cartera=calcCartera(); const quality=qualityAudit();
     return {roiTrials:avg(resultVals.map(r=>r.roiPct)), trialConversion,eventRoi, leadToOrder,twoTouches,sop,cartera,quality, resultVals};
   }
@@ -250,7 +460,7 @@ const APP = (()=>{
       if(latest[t.id] && n(latest[t.id].roiPct)<0) alerts.push({sev:'bad',area:'ROI',msg:`${t.id} ROI negativo`,action:'No repetir hasta corregir causa técnica, zona o costo.'});
     });
     d.events.forEach(e=>{ const leads=d.leads.filter(l=>eq(l.eventId,e.id)); if(e.decision==='GO' && e.fecha && age(e.fecha)>3 && !leads.length) alerts.push({sev:'warn',area:'Eventos',msg:`${e.nombre} aprobado sin leads cargados`,action:'Capturar leads o cerrar post-mortem sin retorno.'}); if(e.decision==='GO' && age(e.fecha)>30 && !e.post30) alerts.push({sev:'warn',area:'Eventos',msg:`${e.nombre} sin post-mortem 30 días`,action:'Registrar ventas atribuibles y decisión repetir/ajustar.'}); });
-    d.leads.forEach(l=>{ if(l.fecha && age(l.fecha)>7 && !l.secondTouch) alerts.push({sev:'bad',area:'Leads',msg:`Lead ${l.nombre} sin 2º toque en 7 días`,action:'Contactar, programar siguiente paso o descartar con razón.'}); });
+    d.leads.forEach(l=>{ if(l.fecha && age(l.fecha)>7 && !leadSLAOK(l)) alerts.push({sev:'bad',area:'Leads',msg:`Lead ${l.nombre} no cumple SLA 48h/7d`,action:'1er contacto ≤48h desde captura y 2º contacto ≤7 días; si no procede, descartar con razón.'}); });
     d.accounts.forEach(a=>{ if(!a.paymentDate && Math.max(0,age(a.dueDate))>60) alerts.push({sev:'bad',area:'Cartera',msg:`${a.client} con ${money(a.amount)} vencido >60 días`,action:'Bloquear surtido y firmar plan de pago.'}); });
     const sop=calcSOP(); if(sop.stockouts>0) alerts.push({sev:'bad',area:'S&OP',msg:`${sop.stockouts} variedad(es) con riesgo de stockout`,action:'Reunión S&OP: comprar, reasignar o ajustar promoción.'});
     const penalty=sum(alerts.map(a=>a.sev==='bad'?9:4)); const score=clamp(100-penalty,0,100);
@@ -267,8 +477,8 @@ const APP = (()=>{
         ${kpi('Ensayo → venta',pct(m.trialConversion),`Meta ≥25%`,m.trialConversion>=25?'good':m.trialConversion>=10?'warn':'bad')}
         ${kpi('ROI prom. eventos',pct(m.eventRoi),`Nuevo ≥30% · repetido ≥50%`,m.eventRoi>=35?'good':m.eventRoi>=0?'warn':'bad')}
         ${kpi('Lead → orden',pct(m.leadToOrder),`Meta ≥20%`,m.leadToOrder>=20?'good':m.leadToOrder>=10?'warn':'bad')}
-        ${kpi('2 toques / 7 días',pct(m.twoTouches),`Meta ≥90%`,m.twoTouches>=90?'good':m.twoTouches>=70?'warn':'bad')}
-        ${kpi('Fill-rate S&OP',pct(m.sop.fillRate),`Stockouts: ${m.sop.stockouts}`,m.sop.fillRate>=90&&m.sop.stockouts===0?'good':m.sop.fillRate>=75?'warn':'bad')}
+        ${kpi('SLA leads 48h/7d',pct(m.twoTouches),`1er toque ≤48h · 2º ≤7d`,m.twoTouches>=90?'good':m.twoTouches>=70?'warn':'bad')}
+        ${kpi('Cobertura pedidos firmes',pct(m.sop.fillRate),`Stockouts: ${m.sop.stockouts}`,m.sop.fillRate>=90&&m.sop.stockouts===0?'good':m.sop.fillRate>=75?'warn':'bad')}
         ${kpi('DSO estimado',dec(m.cartera.dso,0)+' días',`Cartera 60+: ${pct(m.cartera.pct60)}`,m.cartera.dso<=45&&m.cartera.pct60<=10?'good':m.cartera.dso<=60?'warn':'bad')}
       </div>
       <div class="split" style="margin-top:18px">
@@ -294,7 +504,8 @@ const APP = (()=>{
   function tabbar(prefix,items){return `<div class="tabs">${items.map(([id,txt])=>`<button class="${state.sub[prefix]===id?'active':''}" onclick="APP.sub('${prefix}','${id}')">${txt}</button>`).join('')}</div>`}
   function renderTrials(){
     const d=data();
-    const rows=d.trials.map(t=>`<tr><td>${esc(t.id)}</td><td>${esc(t.folioExternoGalera||'')}</td><td>${esc(t.cultivo)}</td><td>${esc(t.variedad)}<br><span class="small muted">${esc(t.casaComercial||'')}</span></td><td>${esc(t.control||'')}<br><span class="small muted">${esc(t.proveedorControl||'')}</span></td><td>${esc(t.region||'')}<br><span class="small muted">${esc(t.estadoGeografico||'')} ${esc(t.municipio||'')}</span></td><td>${esc(t.productor||'')}<br><span class="small muted">Cuenta: ${esc(t.clienteObjetivo||'—')}</span></td><td>${esc(t.mercadoObjetivo||'')}<br><span class="small muted">${esc(t.segmentoObjetivo||'')}</span></td><td>${esc(t.tecnico)}</td><td>${pill(t.estado||'Planeado',t.estado==='Terminado'?'green':t.estado==='Activo'?'blue':t.estado==='Cancelado'?'red':'yellow')}</td><td>${pill(t.vinculoComercial||'Sin dato',t.vinculoComercial==='Sí'?'green':t.vinculoComercial==='No'?'red':'yellow')}</td><td>${btns('trial',t.id)}</td></tr>`);
+    const tf=state.trialFilters||{}; const trialList=d.trials.filter(t=>(!tf.q||[t.id,t.folioExternoGalera,t.cultivo,t.variedad,t.productor,t.region,t.tecnico].join(' ').toLowerCase().includes(String(tf.q).toLowerCase()))&&(!tf.estado||eq(t.estado,tf.estado))&&(!tf.cultivo||eq(t.cultivo,tf.cultivo))&&(!tf.tecnico||eq(t.tecnico,tf.tecnico)));
+    const rows=trialList.map(t=>`<tr><td>${esc(t.id)}</td><td>${esc(t.folioExternoGalera||'')}</td><td>${esc(t.cultivo)}</td><td>${esc(t.variedad)}<br><span class="small muted">${esc(t.casaComercial||'')}</span></td><td>${esc(t.control||'')}<br><span class="small muted">${esc(t.proveedorControl||'')}</span></td><td>${esc(t.region||'')}<br><span class="small muted">${esc(t.estadoGeografico||'')} ${esc(t.municipio||'')}</span></td><td>${esc(t.productor||'')}<br><span class="small muted">Cuenta: ${esc(t.clienteObjetivo||'—')}</span></td><td>${esc(t.mercadoObjetivo||'')}<br><span class="small muted">${esc(t.segmentoObjetivo||'')}</span></td><td>${esc(t.tecnico)}</td><td>${pill(t.estado||'Planeado',t.estado==='Terminado'?'green':t.estado==='Activo'?'blue':t.estado==='Cancelado'?'red':'yellow')}</td><td>${pill(t.vinculoComercial||'Sin dato',t.vinculoComercial==='Sí'?'green':t.vinculoComercial==='No'?'red':'yellow')}</td><td>${btns('trial',t.id)}</td></tr>`);
     $('campo_content').innerHTML=`<div class="card"><div class="section-title"><h2>${state.editing.trial?'Editar':'Nuevo'} ensayo</h2>${pill('Ficha técnica + vínculo comercial','blue')}</div>
       <h3>1) Identificación técnica</h3>
       <div class="grid-4">
@@ -350,7 +561,7 @@ const APP = (()=>{
       <label>Salida comercial esperada</label><textarea id="tr_salidaComercial" placeholder="Ej. receta comercial, demo privada, paquete varietal, campaña técnica, lead de cuenta clave"></textarea>
       <div class="actions"><button class="btn-primary" onclick="APP.saveTrial()">💾 Guardar ensayo</button><button class="btn-secondary" onclick="APP.cancelEdit('trial')">Limpiar</button></div>
     </div>
-    <div class="card"><div class="section-title"><h2>Ensayos registrados</h2><button class="btn-success" onclick="APP.exportSheet('trials')">Exportar</button></div>${table(['ID','Folio Galera','Cultivo','Variedad / casa','Control / proveedor','Región / municipio','Productor / cuenta','Mercado / segmento','Técnico','Estado','Vínculo','Acciones'],rows)}</div>`;
+    <div class="card"><div class="section-title"><h2>Ensayos registrados</h2><button class="btn-success" onclick="APP.exportSheet('trials')">Exportar</button></div><div class="quick-filters"><div><label>Buscar</label><input value="${esc((state.trialFilters||{}).q||'')}" oninput="APP.setTrialFilter('q',this.value)" placeholder="folio, cultivo, variedad, productor"></div><div><label>Estado</label><select onchange="APP.setTrialFilter('estado',this.value)">${uniqOpts(d.trials.map(t=>t.estado),(state.trialFilters||{}).estado,'Todos')}</select></div><div><label>Cultivo</label><select onchange="APP.setTrialFilter('cultivo',this.value)">${uniqOpts(d.trials.map(t=>t.cultivo),(state.trialFilters||{}).cultivo,'Todos')}</select></div><div><label>Técnico</label><select onchange="APP.setTrialFilter('tecnico',this.value)">${uniqOpts(d.trials.map(t=>t.tecnico),(state.trialFilters||{}).tecnico,'Todos')}</select></div></div>${table(['ID','Folio Galera','Cultivo','Variedad / casa','Control / proveedor','Región / municipio','Productor / cuenta','Mercado / segmento','Técnico','Estado','Vínculo','Acciones'],rows)}</div>`;
     if(state.editing.trial){loadTrial(d.trials.find(x=>eq(x.id,state.editing.trial)));}
   }
   function saveTrial(){ const id=state.editing.trial||uid('ENS'); const obj={id,
@@ -415,6 +626,8 @@ const APP = (()=>{
       <h3>3) Costos del Ensayo</h3>
       <div class="grid-4">
         <div><label>Semillas $</label><input id="res_semilla"></div>
+        <div><label>Precio semilla control $/bolsa</label><input id="res_semillaControl" placeholder="opcional"></div>
+        <div><label>Precio semilla Galera $/bolsa</label><input id="res_semillaGalera" placeholder="opcional"></div>
         <div><label>Insumos $</label><input id="res_insumos"></div>
         <div><label>Material $</label><input id="res_materiales"></div>
         <div><label>Horas técnico</label><input id="res_horasTec"></div>
@@ -426,16 +639,17 @@ const APP = (()=>{
       <div class="grid-2">
         <div><label>Precio por kg $</label><input id="res_precioKg"></div>
         <div><label>Costo de producción / variable por kg $</label><input id="res_costoVariableKg"></div>
+        <div class="notice info"><b>Fórmula ROI:</b> margen neto = producción adicional × margen unitario - diferencial de semilla. El costo del ensayo no debe duplicarse en el costo variable por kg.</div>
       </div>
       <label>Conclusión técnica</label><textarea id="res_conclusion"></textarea>
       <label>Implicación comercial / recomendación de portafolio</label><textarea id="res_implicacionComercial" placeholder="Ej. escalar a mercado X, generar demo, atacar competidor Y, reforzar seguimiento con cuenta objetivo"></textarea>
       <div class="actions"><button class="btn-primary" onclick="APP.previewResult()">🧮 Calcular</button><button class="btn-success" onclick="APP.saveResult()">💾 Guardar resultado</button><button class="btn-secondary" onclick="APP.cancelEdit('result')">Limpiar</button></div><div id="res_preview" style="margin-top:12px"></div></div><div class="card"><h2>Historial de resultados con contexto comercial</h2>${table(['Fecha','Folio / ID','Cultivo','Variedad / casa','Testigo / proveedor','Región / municipio','Evaluación Galera','Rend. C/G','Mejora','Costo','Margen','ROI','Evaluación','Acciones'],rows)}</div>`;
     if(state.editing.result){loadResult(d.results.find(x=>eq(x.id,state.editing.result)));}
   }
-  function previewResult(){ const c=resultCalcFromForm(); const rec=field('res_recomendacionComercialGalera')&&field('res_recomendacionComercialGalera')!=='Automática / no definida'?field('res_recomendacionComercialGalera'):c.recomendacion; $('res_preview').innerHTML=`<div class="kpi-grid">${kpi('Producción adicional',dec(c.diffKg,0)+' kg',`Diferencia ${dec(c.diffTon,2)} ton/ha × ${dec(c.areaHa,2)} ha`,c.diffKg>0?'good':'bad')}${kpi('Mejora vs control',pct(c.mejoraPct),'Rendimiento Galera vs control',c.mejoraPct>0?'good':'bad')}${kpi('Margen incremental',money(c.margen),`Margen unitario ${money(c.unitMargin)}/kg`,c.margen>0?'good':'bad')}${kpi('Costo total ensayo',money(c.costo),'Costeo completo','info')}${kpi('ROI ensayo',pct(c.roiPct),'Meta ≥30%',c.roiPct>=30?'good':c.roiPct>=0?'warn':'bad')}${kpi('Decisión sugerida',c.evaluacion,c.recomendacion,c.evaluacion==='Exitoso'?'good':c.evaluacion==='Parcial'?'warn':'bad')}${kpi('Recomendación Galera',esc(rec),field('res_estatusFinalGalera')||'Estatus no definido',rec.includes('Escalar')?'good':rec.includes('Descartar')||rec.includes('No escalar')?'bad':'warn')}</div>`; }
-  function saveResult(){ const c=resultCalcFromForm(); const recSel=field('res_recomendacionComercialGalera')||'Automática / no definida'; const id=state.editing.result||uid('RES'); const obj={id,trialId:field('res_trialId'),fecha:field('res_fecha')||today(),rendControl:n(field('res_rendControl')),rendTratado:n(field('res_rendTratado')),precioKg:n(field('res_precioKg')),costoVariableKg:n(field('res_costoVariableKg')),semilla:n(field('res_semilla')),insumos:n(field('res_insumos')),materiales:n(field('res_materiales')),horasTec:n(field('res_horasTec')),costoHora:n(field('res_costoHora')),traslados:n(field('res_traslados')),otros:n(field('res_otros')),calidad:n(field('res_calidad')),facilidad:n(field('res_facilidad')),porcentajeCosecha:n(field('res_porcentajeCosecha')),sanidadGeneral:field('res_sanidadGeneral'),uniformidadPlantaFruta:field('res_uniformidadPlantaFruta'),madurez:field('res_madurez'),color:field('res_color'),forma:field('res_forma'),calibreDominante:field('res_calibreDominante'),diametroProductoCm:n(field('res_diametroProductoCm')),tamanoTalloCm:n(field('res_tamanoTalloCm')),pesoProductoG:n(field('res_pesoProductoG')),enfermedadObservada:field('res_enfermedadObservada'),ventajaPrincipal:field('res_ventajaPrincipal'),desventajaPrincipal:field('res_desventajaPrincipal'),comparacionVsTestigo:field('res_comparacionVsTestigo'),recomendacionComercialGalera:recSel,estatusFinalGalera:field('res_estatusFinalGalera'),conclusion:field('res_conclusion'),implicacionComercial:field('res_implicacionComercial'),...c,recomendacionComercialFinal:recSel==='Automática / no definida'?c.recomendacion:recSel,updatedAt:new Date().toISOString()}; if(!obj.trialId){alert('Selecciona un ensayo.');return;} upsert(K.results,obj); state.editing.result=null; toast('Resultado guardado'); render(); }
+  function previewResult(){ const c=resultCalcFromForm(); const rec=field('res_recomendacionComercialGalera')&&field('res_recomendacionComercialGalera')!=='Automática / no definida'?field('res_recomendacionComercialGalera'):c.recomendacion; $('res_preview').innerHTML=`<div class="kpi-grid">${kpi('Producción adicional',dec(c.diffKg,0)+' kg',`Diferencia ${dec(c.diffTon,2)} ton/ha × ${dec(c.areaHa,2)} ha`,c.diffKg>0?'good':'bad')}${kpi('Mejora vs control',pct(c.mejoraPct),'Rendimiento Galera vs control',c.mejoraPct>0?'good':'bad')}${kpi('Margen neto incremental',money(c.margen),`Bruto ${money(c.margenBruto)} · Δ semilla ${money(c.deltaCostoSemilla)}`,c.margen>0?'good':'bad')}${kpi('Costo total ensayo',money(c.costo),'Costeo completo','info')}${kpi('ROI ensayo',pct(c.roiPct),'Meta ≥30%',c.roiPct>=30?'good':c.roiPct>=0?'warn':'bad')}${kpi('Decisión sugerida',c.evaluacion,c.recomendacion,c.evaluacion==='Exitoso'?'good':c.evaluacion==='Parcial'?'warn':'bad')}${kpi('Recomendación Galera',esc(rec),field('res_estatusFinalGalera')||'Estatus no definido',rec.includes('Escalar')?'good':rec.includes('Descartar')||rec.includes('No escalar')?'bad':'warn')}</div>`; }
+  function saveResult(){ const c=resultCalcFromForm(); const recSel=field('res_recomendacionComercialGalera')||'Automática / no definida'; const id=state.editing.result||uid('RES'); const obj={id,trialId:field('res_trialId'),fecha:field('res_fecha')||today(),rendControl:n(field('res_rendControl')),rendTratado:n(field('res_rendTratado')),precioKg:n(field('res_precioKg')),costoVariableKg:n(field('res_costoVariableKg')),semilla:n(field('res_semilla')),semillaControl:n(field('res_semillaControl')),semillaGalera:n(field('res_semillaGalera')),insumos:n(field('res_insumos')),materiales:n(field('res_materiales')),horasTec:n(field('res_horasTec')),costoHora:n(field('res_costoHora')),traslados:n(field('res_traslados')),otros:n(field('res_otros')),calidad:n(field('res_calidad')),facilidad:n(field('res_facilidad')),porcentajeCosecha:normalizePercentInput(field('res_porcentajeCosecha')),sanidadGeneral:field('res_sanidadGeneral'),uniformidadPlantaFruta:field('res_uniformidadPlantaFruta'),madurez:field('res_madurez'),color:field('res_color'),forma:field('res_forma'),calibreDominante:field('res_calibreDominante'),diametroProductoCm:n(field('res_diametroProductoCm')),tamanoTalloCm:n(field('res_tamanoTalloCm')),pesoProductoG:n(field('res_pesoProductoG')),enfermedadObservada:field('res_enfermedadObservada'),ventajaPrincipal:field('res_ventajaPrincipal'),desventajaPrincipal:field('res_desventajaPrincipal'),comparacionVsTestigo:field('res_comparacionVsTestigo'),recomendacionComercialGalera:recSel,estatusFinalGalera:field('res_estatusFinalGalera'),conclusion:field('res_conclusion'),implicacionComercial:field('res_implicacionComercial'),...c,recomendacionComercialFinal:recSel==='Automática / no definida'?c.recomendacion:recSel,updatedAt:new Date().toISOString()}; if(!obj.trialId){alert('Selecciona un ensayo.');return;} upsert(K.results,obj); state.editing.result=null; toast('Resultado guardado'); render(); }
   function prefillResult(){ const t=read(K.trials).find(x=>eq(x.id,field('res_trialId'))); if(t&&!field('res_areaHa'))setVal('res_areaHa',t.superficieHa); }
-  function loadResult(r){ if(!r)return; ['trialId','fecha','areaHa','rendControl','rendTratado','precioKg','costoVariableKg','semilla','insumos','materiales','horasTec','costoHora','traslados','otros','calidad','facilidad','porcentajeCosecha','sanidadGeneral','uniformidadPlantaFruta','madurez','color','forma','calibreDominante','diametroProductoCm','tamanoTalloCm','pesoProductoG','enfermedadObservada','ventajaPrincipal','desventajaPrincipal','comparacionVsTestigo','recomendacionComercialGalera','estatusFinalGalera','conclusion','implicacionComercial'].forEach(k=>setVal('res_'+k,r[k])); previewResult(); }
+  function loadResult(r){ if(!r)return; ['trialId','fecha','areaHa','rendControl','rendTratado','precioKg','costoVariableKg','semilla','semillaControl','semillaGalera','insumos','materiales','horasTec','costoHora','traslados','otros','calidad','facilidad','porcentajeCosecha','sanidadGeneral','uniformidadPlantaFruta','madurez','color','forma','calibreDominante','diametroProductoCm','tamanoTalloCm','pesoProductoG','enfermedadObservada','ventajaPrincipal','desventajaPrincipal','comparacionVsTestigo','recomendacionComercialGalera','estatusFinalGalera','conclusion','implicacionComercial'].forEach(k=>setVal('res_'+k,r[k])); previewResult(); }
 
   function renderRecipes(){
     const d=data(); const latest=latestResultsByTrial(); const successful=d.trials.filter(t=>latest[t.id]&&n(latest[t.id].roiPct)>=30&&n(latest[t.id].mejoraPct)>0);
@@ -535,11 +749,13 @@ const APP = (()=>{
   function renderPipeline(){
     const active=state.sub.pipeline||'embudo';
     $('page-pipeline').innerHTML=`${tabbar('pipeline',[['embudo','Embudo comercial'],['captura','Captura / gestión'],['post','Post-mortem']])}<div id="pipeline_content"></div>`;
-    if(active==='captura'){ renderLeadForm('pipeline_content'); return; }
+    if(active==='captura'){ renderLeadForm('pipeline_content',true); return; }
     if(active==='post'){ renderEventPost(); return; }
-    const d=data(); const byStage=stages.map(st=>d.leads.filter(l=>l.stage===st)); const total=sum(d.leads.map(l=>l.ticket));
-    const rows=d.leads.map(l=>{const e=d.events.find(x=>eq(x.id,l.eventId)); const t=d.trials.find(x=>eq(x.id,l.trialId)); return `<tr><td>${esc(l.nombre)}</td><td>${esc(l.cultivo)}</td><td>${money(l.ticket)}</td><td>${stagebar(l.stage)}</td><td>${esc(l.owner)}</td><td>${esc(e?.nombre||t?.variedad||'Manual')}</td><td>${esc(l.nextStep)}</td><td>${leadIsClosed(l)?pill('Resultado completo','green'):leadIsOrder(l)?pill('Venta no cobrada','yellow'):pill('En gestión','blue')}</td><td>${btns('lead',l.id)}</td></tr>`});
-    $('pipeline_content').innerHTML=`<div class="kpi-grid">${kpi('Pipeline total',money(total),'Ticket estimado de oportunidades','info')}${kpi('Registros activos',int(d.leads.length),'Eventos, ensayos y manuales','info')}${kpi('Órdenes',int(d.leads.filter(leadIsOrder).length),'Etapa ≥ Orden','blue')}${kpi('Cobrado',money(sum(d.leads.filter(leadIsClosed).map(l=>l.ticket))),'Resultado final','good')}${kpi('Conversión Lead→Orden',pct(d.leads.length?d.leads.filter(leadIsOrder).length/d.leads.length*100:0),'Meta ≥20%',d.leads.length&&d.leads.filter(leadIsOrder).length/d.leads.length*100>=20?'good':'warn')}</div><div class="card"><div class="section-title"><h2>Embudo comercial único</h2><button class="btn-primary" onclick="APP.quickLead()">+ Nueva oportunidad</button></div><div class="notice info"><b>Regla operativa:</b> todo lead u oportunidad vive aquí, sin importar si nació de un evento, ensayo, receta comercial o gestión manual.</div><div class="grid">${stages.map((s,i)=>`<div class="notice info"><b>${esc(s)}</b><br><span class="small">${byStage[i].length} registros · ${money(sum(byStage[i].map(l=>l.ticket)))}</span></div>`).join('')}</div></div><div class="card"><h2>Pipeline detallado</h2>${table(['Productor','Cultivo','Ticket','Etapa','Responsable','Origen','Siguiente paso','Estado','Acciones'],rows)}</div>`;
+    const d=data(); const pf=state.pipelineFilters||{};
+    const filtered=d.leads.filter(l=>(!pf.q||[l.nombre,l.cultivo,l.telefono,l.owner,l.nextStep,l.notes].join(' ').toLowerCase().includes(String(pf.q).toLowerCase()))&&(!pf.stage||eq(l.stage,pf.stage))&&(!pf.owner||eq(l.owner,pf.owner))&&(!pf.cultivo||eq(l.cultivo,pf.cultivo)));
+    const byStage=stages.map(st=>filtered.filter(l=>l.stage===st)); const total=sum(filtered.map(l=>l.ticket));
+    const rows=filtered.map(l=>{const e=d.events.find(x=>eq(x.id,l.eventId)); const t=d.trials.find(x=>eq(x.id,l.trialId)); return `<tr><td>${esc(l.nombre)}</td><td>${esc(l.cultivo)}</td><td>${money(l.ticket)}</td><td>${stagebar(l.stage)}</td><td>${esc(l.owner)}</td><td>${esc(e?.nombre||t?.variedad||'Manual')}</td><td>${esc(l.nextStep)}</td><td>${leadSLAOK(l)?pill('SLA OK','green'):(l.fecha&&age(l.fecha)>7?pill('SLA vencido','red'):pill('En plazo','yellow'))}</td><td>${leadIsClosed(l)?pill('Resultado completo','green'):leadIsOrder(l)?pill('Venta no cobrada','yellow'):pill('En gestión','blue')}</td><td>${btns('lead',l.id)}</td></tr>`});
+    $('pipeline_content').innerHTML=`<div class="kpi-grid">${kpi('Pipeline filtrado',money(total),'Ticket estimado según filtros','info')}${kpi('Oportunidades',int(filtered.length),'Registros visibles','info')}${kpi('Órdenes',int(filtered.filter(leadIsOrder).length),'Etapa ≥ Orden','blue')}${kpi('Cobrado',money(sum(filtered.filter(leadIsClosed).map(l=>l.ticket))),'Resultado final','good')}${kpi('SLA 48h/7d',pct(filtered.length?filtered.filter(leadSLAOK).length/filtered.length*100:0),'Seguimiento comercial',filtered.length&&filtered.filter(leadSLAOK).length/filtered.length*100>=.9?'good':'warn')}</div><div class="card"><div class="section-title"><h2>Embudo comercial único</h2><button class="btn-primary" onclick="APP.quickLead()">+ Nueva oportunidad</button></div><div class="quick-filters"><div><label>Buscar</label><input value="${esc(pf.q||'')}" oninput="APP.setPipeFilter('q',this.value)" placeholder="productor, cultivo, responsable"></div><div><label>Etapa</label><select onchange="APP.setPipeFilter('stage',this.value)">${uniqOpts(stages,pf.stage,'Todas')}</select></div><div><label>Responsable</label><select onchange="APP.setPipeFilter('owner',this.value)">${uniqOpts(d.leads.map(l=>l.owner),pf.owner,'Todos')}</select></div><div><label>Cultivo</label><select onchange="APP.setPipeFilter('cultivo',this.value)">${uniqOpts(d.leads.map(l=>l.cultivo),pf.cultivo,'Todos')}</select></div></div><div class="notice info"><b>Regla operativa:</b> eventos y ensayos pueden originar oportunidades, pero el seguimiento comercial se administra aquí en un solo pipeline.</div><div class="grid">${stages.map((st,i)=>`<div class="notice info"><b>${esc(st)}</b><br><span class="small">${byStage[i].length} registros · ${money(sum(byStage[i].map(l=>l.ticket)))}</span></div>`).join('')}</div></div><div class="card"><h2>Pipeline detallado</h2>${table(['Productor','Cultivo','Ticket','Etapa','Responsable','Origen','Siguiente paso','SLA','Estado','Acciones'],rows)}</div>`;
   }
   function stagebar(stage){const idx=leadStageValue(stage); return `<div><div class="stagebar">${stages.map((s,i)=>`<span title="${esc(s)}" class="${i<=idx?'on':''}"></span>`).join('')}</div><span class="small muted">${esc(stage||'Lead')}</span></div>`}
   function quickLead(){ state.page='pipeline'; state.sub.pipeline='captura'; state.editing.lead=null; show('pipeline'); }
@@ -548,19 +764,19 @@ const APP = (()=>{
   function renderDemand(){
     const d=data();
     const rows=d.demand.map(x=>`<tr><td>${esc(x.periodo)}</td><td>${esc(x.cultivo)}</td><td>${esc(x.variedad)}</td><td>${esc(x.zona)}</td><td>${money(x.pedidosFirmes)}</td><td>${money(x.pipelinePonderado)}</td><td>${money(x.forecast)}</td><td>${money(x.demandaSemanal)}</td><td>${esc(x.confianzaForecast||'—')}</td><td>${btns('demand',x.id)}</td></tr>`);
-    $('sop_content').innerHTML=`<div class="card"><div class="section-title"><h2>${state.editing.demand?'Editar':'Nueva'} demanda / forecast</h2>${pill('Supuestos del forecast','blue')}</div><div class="grid-4"><div><label>Periodo</label><input id="dm_periodo" placeholder="Jun-Jul 2026"></div><div><label>Cultivo</label><input id="dm_cultivo"></div><div><label>Variedad *</label><input id="dm_variedad"></div><div><label>Zona</label><input id="dm_zona"></div><div><label>Pedidos firmes $</label><input id="dm_pedidosFirmes"></div><div><label>Pipeline ponderado $</label><input id="dm_pipelinePonderado"></div><div><label>Forecast total $</label><input id="dm_forecast"></div><div><label>Demanda semanal $</label><input id="dm_demandaSemanal"></div><div><label>Fuente principal forecast</label><select id="dm_fuenteForecast"><option>Histórico</option><option>Pedidos firmes</option><option>Pipeline comercial</option><option>Lanzamiento / promoción</option></select></div><div><label>Confianza forecast</label><select id="dm_confianzaForecast"><option>Alta</option><option>Media</option><option>Baja</option></select></div><div><label>Lead time esperado (semanas)</label><input id="dm_leadTimeSemanas"></div><div><label>Objetivo nivel de servicio %</label><input id="dm_objetivoServicio"></div><div><label>Impacto promoción / lanzamiento $</label><input id="dm_promocionPlan"></div></div><label>Supuesto clave / comentario</label><textarea id="dm_comentario"></textarea><div class="actions"><button class="btn-success" onclick="APP.saveDemand()">Guardar demanda</button></div></div><div class="card"><h2>Forecast por variedad</h2>${table(['Periodo','Cultivo','Variedad','Zona','Pedidos firmes','Pipeline pond.','Forecast','Demanda semanal','Confianza','Acciones'],rows)}</div><div class="card"><h2>Información S&OP agregada</h2><div class="notice info"><b>Antes faltaba:</b> fuente/confianza del forecast, lead time, objetivo de servicio, impacto de promociones y supuesto clave. Estos datos permiten saber si el problema es de demanda, compra, inventario o ejecución comercial.</div></div>`;
+    $('sop_content').innerHTML=`<div class="card"><div class="section-title"><h2>${state.editing.demand?'Editar':'Nueva'} demanda / forecast</h2>${pill('Supuestos del forecast','blue')}</div><div class="grid-4"><div><label>Periodo</label><input id="dm_periodo" placeholder="Jun-Jul 2026"></div><div><label>Cultivo</label><input id="dm_cultivo"></div><div><label>Variedad *</label><input id="dm_variedad"></div><div><label>Zona</label><input id="dm_zona"></div><div><label>Unidad S&OP</label><select id="dm_unidadSOP"><option>$</option><option>Bolsas</option><option>Kg semilla</option><option>Unidades</option></select></div><div><label>Pedidos firmes</label><input id="dm_pedidosFirmes" placeholder="misma unidad S&OP"></div><div><label>Pipeline ponderado $</label><input id="dm_pipelinePonderado"></div><div><label>Forecast total</label><input id="dm_forecast" placeholder="misma unidad S&OP"></div><div><label>Demanda semanal</label><input id="dm_demandaSemanal" placeholder="misma unidad S&OP"></div><div><label>Fuente principal forecast</label><select id="dm_fuenteForecast"><option>Histórico</option><option>Pedidos firmes</option><option>Pipeline comercial</option><option>Lanzamiento / promoción</option></select></div><div><label>Confianza forecast</label><select id="dm_confianzaForecast"><option>Alta</option><option>Media</option><option>Baja</option></select></div><div><label>Lead time esperado (semanas)</label><input id="dm_leadTimeSemanas"></div><div><label>Objetivo nivel de servicio %</label><input id="dm_objetivoServicio"></div><div><label>Impacto promoción / lanzamiento $</label><input id="dm_promocionPlan"></div></div><label>Supuesto clave / comentario</label><textarea id="dm_comentario"></textarea><div class="actions"><button class="btn-success" onclick="APP.saveDemand()">Guardar demanda</button></div></div><div class="card"><h2>Forecast por variedad</h2>${table(['Periodo','Cultivo','Variedad','Zona','Pedidos firmes','Pipeline pond.','Forecast','Demanda semanal','Confianza','Acciones'],rows)}</div><div class="card"><h2>Información S&OP agregada</h2><div class="notice info"><b>Antes faltaba:</b> fuente/confianza del forecast, lead time, objetivo de servicio, impacto de promociones y supuesto clave. Estos datos permiten saber si el problema es de demanda, compra, inventario o ejecución comercial.</div></div>`;
     if(state.editing.demand)loadDemand(d.demand.find(x=>eq(x.id,state.editing.demand)));
   }
-  function saveDemand(){ const id=state.editing.demand||uid('DEM'); const obj={id,periodo:field('dm_periodo'),cultivo:field('dm_cultivo'),variedad:field('dm_variedad'),zona:field('dm_zona'),pedidosFirmes:n(field('dm_pedidosFirmes')),pipelinePonderado:n(field('dm_pipelinePonderado')),forecast:n(field('dm_forecast')),demandaSemanal:n(field('dm_demandaSemanal')),fuenteForecast:field('dm_fuenteForecast'),confianzaForecast:field('dm_confianzaForecast'),leadTimeSemanas:n(field('dm_leadTimeSemanas')),objetivoServicio:n(field('dm_objetivoServicio')),promocionPlan:n(field('dm_promocionPlan')),comentario:field('dm_comentario')}; if(!obj.variedad){alert('Variedad es obligatoria.');return;} upsert(K.demand,obj); state.editing.demand=null; toast('Demanda guardada'); render(); }
-  function loadDemand(x){ if(!x)return; ['periodo','cultivo','variedad','zona','pedidosFirmes','pipelinePonderado','forecast','demandaSemanal','fuenteForecast','confianzaForecast','leadTimeSemanas','objetivoServicio','promocionPlan','comentario'].forEach(k=>setVal('dm_'+k,x[k])); }
+  function saveDemand(){ const id=state.editing.demand||uid('DEM'); const obj={id,periodo:field('dm_periodo'),cultivo:field('dm_cultivo'),variedad:field('dm_variedad'),zona:field('dm_zona'),pedidosFirmes:n(field('dm_pedidosFirmes')),pipelinePonderado:n(field('dm_pipelinePonderado')),forecast:n(field('dm_forecast')),demandaSemanal:n(field('dm_demandaSemanal')),unidadSOP:field('dm_unidadSOP'),fuenteForecast:field('dm_fuenteForecast'),confianzaForecast:field('dm_confianzaForecast'),leadTimeSemanas:n(field('dm_leadTimeSemanas')),objetivoServicio:n(field('dm_objetivoServicio')),promocionPlan:n(field('dm_promocionPlan')),comentario:field('dm_comentario')}; if(!obj.variedad){alert('Variedad es obligatoria.');return;} upsert(K.demand,obj); state.editing.demand=null; toast('Demanda guardada'); render(); }
+  function loadDemand(x){ if(!x)return; ['periodo','cultivo','variedad','zona','pedidosFirmes','pipelinePonderado','forecast','demandaSemanal','unidadSOP','fuenteForecast','confianzaForecast','leadTimeSemanas','objetivoServicio','promocionPlan','comentario'].forEach(k=>setVal('dm_'+k,x[k])); }
   function renderInventory(){
     const d=data();
     const rows=d.inventory.map(x=>{const net=n(x.disponible)-n(x.comprometido)+n(x.transito)+n(x.pedidoAbierto); const cov=n(x.demandaSemanal)?net/n(x.demandaSemanal):0; const gap=n(x.seguridadSemanas)?n(x.seguridadSemanas)-cov:0; return `<tr><td>${esc(x.cultivo)}</td><td>${esc(x.variedad)}</td><td>${money(x.disponible)}</td><td>${money(x.comprometido)}</td><td>${money(x.transito)}</td><td>${money(x.pedidoAbierto)}</td><td>${money(net)}</td><td>${dec(cov,1)} sem</td><td>${gap>0?pill('Bajo seguridad','red'):cov>8?pill('Sobrestock','yellow'):pill('Sano','green')}</td><td>${btns('inventory',x.id)}</td></tr>`});
-    $('sop_content').innerHTML=`<div class="card"><div class="section-title"><h2>${state.editing.inventory?'Editar':'Nuevo'} inventario</h2>${pill('Seguridad + tránsito + pedidos abiertos','blue')}</div><div class="grid-4"><div><label>Cultivo</label><input id="iv_cultivo"></div><div><label>Variedad *</label><input id="iv_variedad"></div><div><label>Disponible $</label><input id="iv_disponible"></div><div><label>Comprometido $</label><input id="iv_comprometido"></div><div><label>En tránsito $</label><input id="iv_transito"></div><div><label>Pedido abierto $</label><input id="iv_pedidoAbierto"></div><div><label>Demanda semanal $</label><input id="iv_demandaSemanal"></div><div><label>Stock seguridad (semanas)</label><input id="iv_seguridadSemanas"></div><div><label>Lead time proveedor (semanas)</label><input id="iv_leadTimeSemanas"></div><div><label>Fecha arribo esperada</label><input type="date" id="iv_fechaArribo"></div><div><label>Proveedor / lote</label><input id="iv_lote"></div></div><div class="actions"><button class="btn-success" onclick="APP.saveInventory()">Guardar inventario</button></div></div><div class="card"><h2>Inventario y cobertura</h2>${table(['Cultivo','Variedad','Disponible','Comprometido','Tránsito','Pedido abierto','Neto ampliado','Cobertura','Estado','Acciones'],rows)}</div>`;
+    $('sop_content').innerHTML=`<div class="card"><div class="section-title"><h2>${state.editing.inventory?'Editar':'Nuevo'} inventario</h2>${pill('Seguridad + tránsito + pedidos abiertos','blue')}</div><div class="grid-4"><div><label>Cultivo</label><input id="iv_cultivo"></div><div><label>Variedad *</label><input id="iv_variedad"></div><div><label>Unidad S&OP</label><select id="iv_unidadSOP"><option>$</option><option>Bolsas</option><option>Kg semilla</option><option>Unidades</option></select></div><div><label>Disponible</label><input id="iv_disponible" placeholder="misma unidad S&OP"></div><div><label>Comprometido $</label><input id="iv_comprometido"></div><div><label>En tránsito $</label><input id="iv_transito"></div><div><label>Pedido abierto $</label><input id="iv_pedidoAbierto"></div><div><label>Demanda semanal $</label><input id="iv_demandaSemanal"></div><div><label>Stock seguridad (semanas)</label><input id="iv_seguridadSemanas"></div><div><label>Lead time proveedor (semanas)</label><input id="iv_leadTimeSemanas"></div><div><label>Fecha arribo esperada</label><input type="date" id="iv_fechaArribo"></div><div><label>Proveedor / lote</label><input id="iv_lote"></div></div><div class="actions"><button class="btn-success" onclick="APP.saveInventory()">Guardar inventario</button></div></div><div class="card"><h2>Inventario y cobertura</h2>${table(['Cultivo','Variedad','Disponible','Comprometido','Tránsito','Pedido abierto','Neto ampliado','Cobertura','Estado','Acciones'],rows)}</div>`;
     if(state.editing.inventory)loadInventory(d.inventory.find(x=>eq(x.id,state.editing.inventory)));
   }
-  function saveInventory(){ const id=state.editing.inventory||uid('INV'); const obj={id,cultivo:field('iv_cultivo'),variedad:field('iv_variedad'),disponible:n(field('iv_disponible')),comprometido:n(field('iv_comprometido')),transito:n(field('iv_transito')),pedidoAbierto:n(field('iv_pedidoAbierto')),demandaSemanal:n(field('iv_demandaSemanal')),seguridadSemanas:n(field('iv_seguridadSemanas')),leadTimeSemanas:n(field('iv_leadTimeSemanas')),fechaArribo:field('iv_fechaArribo'),lote:field('iv_lote')}; if(!obj.variedad){alert('Variedad es obligatoria.');return;} upsert(K.inventory,obj); state.editing.inventory=null; toast('Inventario guardado'); render(); }
-  function loadInventory(x){ if(!x)return; ['cultivo','variedad','disponible','comprometido','transito','pedidoAbierto','demandaSemanal','seguridadSemanas','leadTimeSemanas','fechaArribo','lote'].forEach(k=>setVal('iv_'+k,x[k])); }
+  function saveInventory(){ const id=state.editing.inventory||uid('INV'); const obj={id,cultivo:field('iv_cultivo'),variedad:field('iv_variedad'),disponible:n(field('iv_disponible')),comprometido:n(field('iv_comprometido')),transito:n(field('iv_transito')),pedidoAbierto:n(field('iv_pedidoAbierto')),demandaSemanal:n(field('iv_demandaSemanal')),seguridadSemanas:n(field('iv_seguridadSemanas')),leadTimeSemanas:n(field('iv_leadTimeSemanas')),fechaArribo:field('iv_fechaArribo'),lote:field('iv_lote'),unidadSOP:field('iv_unidadSOP')}; if(!obj.variedad){alert('Variedad es obligatoria.');return;} upsert(K.inventory,obj); state.editing.inventory=null; toast('Inventario guardado'); render(); }
+  function loadInventory(x){ if(!x)return; ['cultivo','variedad','disponible','comprometido','transito','pedidoAbierto','demandaSemanal','seguridadSemanas','leadTimeSemanas','fechaArribo','lote','unidadSOP'].forEach(k=>setVal('iv_'+k,x[k])); }
   function renderSOPDash(){
     const d=data(); const m=calcSOP(); const vars=[...new Set([...d.demand.map(x=>x.variedad),...d.inventory.map(x=>x.variedad)].filter(Boolean))];
     const rows=vars.map(v=>{const dem=d.demand.filter(x=>x.variedad===v); const inv=d.inventory.filter(x=>x.variedad===v); const pedidos=sum(dem.map(x=>x.pedidosFirmes)); const forecast=sum(dem.map(x=>x.forecast)); const net=sum(inv.map(x=>n(x.disponible)-n(x.comprometido)+n(x.transito)+n(x.pedidoAbierto))); const weekly=sum(dem.map(x=>x.demandaSemanal))||sum(inv.map(x=>x.demandaSemanal)); const cov=weekly?net/weekly:0; const seguridad=avg(inv.map(x=>n(x.seguridadSemanas)))||5; let decision='Mantener'; if(net<pedidos)decision='Comprar / reasignar urgente'; else if(cov<seguridad)decision='Reabastecer'; else if(cov>8)decision='Sobrestock: activar venta'; return `<tr><td>${esc(v)}</td><td>${money(pedidos)}</td><td>${money(forecast)}</td><td>${money(net)}</td><td>${dec(cov,1)} sem</td><td>${dec(seguridad,1)} sem</td><td>${decision.includes('urgente')?pill(decision,'red'):decision.includes('Sobrestock')?pill(decision,'yellow'):pill(decision,'green')}</td></tr>`});
@@ -744,7 +960,7 @@ RESUMEN EJECUTIVO DEL SISTEMA
 - Conversión ensayo→venta: ${dec(p.conversionEnsayoVenta,1)}%
 - Eventos evaluados: ${p.eventos} | ROI promedio eventos: ${dec(p.roiPromedioEventos,1)}%
 - Leads / oportunidades: ${p.leads} | Conversión lead→orden: ${dec(p.conversionLeadOrden,1)}%
-- 2 toques / 7 días: ${dec(p.dosToquesSieteDias,1)}%
+- SLA leads 48h/7d: ${dec(p.dosToquesSieteDias,1)}%
 - Fill-rate: ${dec(p.fillRate,1)}% | Stockouts: ${p.stockouts}
 - DSO estimado: ${dec(p.dso,0)} días | Cartera 60+: ${dec(p.cartera60Mas,1)}%
 
@@ -840,25 +1056,25 @@ Adjunto o adjuntaré el Excel integral del sistema para análisis completo.`;
       <div class="grid-4"><div><label>Archivo Excel</label><input type="file" id="excelImport" accept=".xlsx,.xls"></div><div><label>Modo</label><select id="excelImportMode"><option value="preview">Solo previsualizar</option><option value="merge">Fusionar sin duplicar</option></select></div><div><label>Plantilla guía</label><button class="btn-secondary" onclick="APP.downloadImportTemplate()">📄 Descargar formato</button></div><div><label>Acción</label><button class="btn-success" onclick="APP.importExcel()">Importar / previsualizar</button></div></div>
       <div id="excelImportResult" class="notice info" style="margin-top:12px">Sin archivo importado en esta sesión. Hojas reconocidas: ENSAYOS, BITACORA, RESULTADOS, EVENTOS, LEADS_PIPELINE, DEMANDA_SOP, INVENTARIO, CARTERA y SCORING.</div>
     </div>
-    <div class="grid-2"><div class="card"><h2>Exportar</h2><p class="muted">Descarga datos en Excel o respaldo JSON.</p><div class="actions"><button class="btn-success" onclick="APP.exportWorkbook()">📤 Excel integral</button><button class="btn-secondary" onclick="APP.exportJSON()">💾 Respaldo JSON</button><button class="btn-primary" onclick="APP.printReport()">🖨 Reporte PDF / imprimir</button><button class="btn-purple" onclick="APP.show('agente')">🤖 Enviar a Agente RICO</button></div></div><div class="card"><h2>JSON / demo / migración</h2><p class="muted">Puedes cargar datos demo, importar un JSON exportado por este sistema o migrar registros locales de versiones anteriores.</p><input type="file" id="jsonImport" accept="application/json"><div class="actions"><button class="btn-primary" onclick="APP.importJSON()">Importar JSON</button><button class="btn-warning" onclick="APP.seedDemo()">Cargar demo</button><button class="btn-danger" onclick="APP.clearAll()">Borrar datos v2</button><button class="btn-secondary" onclick="APP.migrateOld()">Migrar datos anteriores</button></div></div></div><div class="card"><h2>Checklist de uso semanal</h2><div class="notice info">Lunes: revisar dashboard y cartera. Miércoles: seguimiento leads y eventos. Viernes: ensayos, evidencia, S&OP y decisiones de compra/promoción.</div></div>`; }
+    <div class="grid-2"><div class="card"><h2>Exportar</h2><p class="muted">Descarga datos en Excel o respaldo JSON.</p><div class="actions"><button class="btn-success" onclick="APP.exportWorkbook()">📤 Excel integral</button><button class="btn-secondary" onclick="APP.exportJSON()">💾 Respaldo JSON</button><button class="btn-primary" onclick="APP.printReport()">🖨 Reporte PDF / imprimir</button><button class="btn-purple" onclick="APP.show('agente')">🤖 Enviar a Agente RICO</button></div></div><div class="card"><h2>JSON / demo / migración</h2><p class="muted">Puedes cargar datos demo, importar un JSON exportado por este sistema o migrar registros locales de versiones anteriores.</p><input type="file" id="jsonImport" accept="application/json"><div class="actions"><button class="btn-primary" onclick="APP.importJSON()">Importar JSON</button><button class="btn-warning" onclick="APP.seedDemo()">Cargar demo</button><button class="btn-danger" onclick="APP.clearAll()">Borrar datos locales</button><button class="btn-secondary" onclick="APP.migrateOld()">Migrar datos anteriores</button></div></div></div><div class="card"><h2>Checklist de uso semanal</h2><div class="notice info">Lunes: revisar dashboard y cartera. Miércoles: seguimiento leads y eventos. Viernes: ensayos, evidencia, S&OP y decisiones de compra/promoción.</div></div>`; }
 
   function importTemplateSpecs(){ return {
     ENSAYOS:{headers:['ID Ensayo','Folio externo Galera','No. ensayo externo','Fuente captura','Cultivo','Variedad Galera','Casa comercial','Variedad control','Proveedor control','Productor','Cliente / cuenta objetivo','Técnico responsable','Responsable comercial','Región','Estado geográfico','Municipio','GPS','Ciclo agrícola','Sistema','Condición de cultivo','Densidad plantas/ha','Suelo','Riego','Fecha siembra','Fecha cosecha estimada','Superficie ha','Tipo de ensayo Galera','Estado','Prioridad','Vínculo comercial','Mercado objetivo','Segmento objetivo','Competidor objetivo','Área potencial ha','Ticket potencial','Objetivo medible','Criterio éxito','Problema / hipótesis','Salida comercial esperada'],sample:['ENS-001','GAL-2026-001','EXT-101','AppSheet','Tomate','Dumas','Enza Zaden','Variedad actual productor','Competidor local','Agrícola San Miguel','Agrícola San Miguel','Ing. Ramos','Comercial Norte','Sinaloa Norte','Sinaloa','Culiacán','24.8091, -107.3940','Primavera 2026','Campo abierto','Bueno / Campo abierto',80000,'Franco','Goteo','2026-02-10','2026-05-20',0.5,'Comparativo control vs tratado','Activo','Alta','Sí','Productores tomate exportación','Productor mediano-alto','Variedad actual productor',18,380000,'+12% rendimiento vs control','ROI ≥30% y calibre exportable','Mayor uniformidad y rendimiento.','Receta comercial y demo privada']},
     BITACORA:{headers:['ID Bitácora','ID Ensayo','Folio externo Galera','Fecha','Responsable','Etapa','Tipo hallazgo','Severidad 1-5','GPS','Foto / evidencia URL','Observación técnica','Acción correctiva'],sample:['BIT-001','ENS-001','GAL-2026-001','2026-03-20','Ing. Ramos','Desarrollo','Vigor',1,'24.8091, -107.3940','','Mayor vigor inicial vs control.','Mantener manejo.']},
-    RESULTADOS:{headers:['ID Resultado','ID Ensayo','Folio externo Galera','Fecha evaluación','Área evaluada ha','Rend. Control ton/ha','Rend. Galera ton/ha','Sanidad general','Uniformidad planta/fruta','Madurez','Color','Forma','Calibre / tamaño dominante','Diámetro producto cm','Tamaño tallo cm','Peso producto g','% cosecha','Enfermedad observada','Ventaja principal','Desventaja principal','Comparación vs testigo','Recomendación comercial Galera','Estatus final Galera','Precio $/kg','Costo de producción por kg','Semilla $','Insumos $','Material $','Horas técnico','Costo por hora $','Traslados $','Otros $','Calidad 1-5','Facilidad 1-5','Conclusión técnica','Implicación comercial'],sample:['RES-001','ENS-001','GAL-2026-001','2026-05-22',0.5,72,83,'Muy buena','Buena / Muy buena','Intermedia','Verde oscuro','Redonda plana','18s / 24s',16,7,1100,95,'Fusarium leve','Mejor sanidad / peso / calibre','Más tardía','Mejor desempeño general vs control','Escalar / promover','Escalar comercialmente',12,7,8000,5000,1200,18,350,2500,1000,4,4,'Buen rendimiento; revisar costo.','Escalar a demo privada con productores de la zona.']},
-    EVENTOS:{headers:['ID Evento','Nombre evento','Fecha','Tipo','Condición','Cultivo','Zona','Público objetivo','Leads meta','Alineación estratégica 0-20','Audiencia calificada 0-20','Inventario disponible 0-20','Timing comercial 0-20','ROI esperado 0-20','Capacidad seguimiento 0-20','Costos directos $','Horas técnicas','Costo hora técnico $','Horas comerciales','Costo hora comercial $','Captación / material $','Seguimiento post-evento $','Otros $','Margen atribuible esperado $','Hipótesis / razón estratégica','Post 30','Post 90'],sample:['EVE-001','Día de Campo Sinaloa','2026-06-01','Día de Campo','Nuevo','Tomate','Sinaloa Norte','Productores de tomate',35,18,17,16,18,15,16,16000,20,350,16,300,3500,2500,1000,65000,'Acelerar adopción de Dumas.','','']},
+    RESULTADOS:{headers:['ID Resultado','ID Ensayo','Folio externo Galera','Fecha evaluación','Área evaluada ha','Rend. Control ton/ha','Rend. Galera ton/ha','Sanidad general','Uniformidad planta/fruta','Madurez','Color','Forma','Calibre / tamaño dominante','Diámetro producto cm','Tamaño tallo cm','Peso producto g','% cosecha','Enfermedad observada','Ventaja principal','Desventaja principal','Comparación vs testigo','Recomendación comercial Galera','Estatus final Galera','Precio $/kg','Costo de producción por kg','Semilla $','Precio semilla control $/bolsa','Precio semilla Galera $/bolsa','Insumos $','Material $','Horas técnico','Costo por hora $','Traslados $','Otros $','Calidad 1-5','Facilidad 1-5','Conclusión técnica','Implicación comercial'],sample:['RES-001','ENS-001','GAL-2026-001','2026-05-22',0.5,72,83,'Muy buena','Buena / Muy buena','Intermedia','Verde oscuro','Redonda plana','18s / 24s',16,7,1100,95,'Fusarium leve','Mejor sanidad / peso / calibre','Más tardía','Mejor desempeño general vs control','Escalar / promover','Escalar comercialmente',12,7,8000,6500,8000,5000,1200,18,350,2500,1000,4,4,'Buen rendimiento; revisar costo.','Escalar a demo privada con productores de la zona.']},
+    EVENTOS:{headers:['ID Evento','Nombre evento','Fecha','Tipo','Condición','Cultivo','Zona','Público objetivo','Leads meta','Alineación estratégica 1-5','Audiencia calificada 1-5','Inventario disponible 1-5','Timing comercial 1-5','Hipótesis comercial 1-5','Capacidad seguimiento 1-5','Costos directos $','Horas técnicas','Costo hora técnico $','Horas comerciales','Costo hora comercial $','Captación / material $','Seguimiento post-evento $','Otros $','Margen atribuible esperado $','Hipótesis / razón estratégica','Post 30','Post 90'],sample:['EVE-001','Día de Campo Sinaloa','2026-06-01','Día de Campo','Nuevo','Tomate','Sinaloa Norte','Productores de tomate',35,5,4,4,5,4,4,16000,20,350,16,300,3500,2500,1000,65000,'Acelerar adopción de Dumas.','','']},
     LEADS_PIPELINE:{headers:['ID Lead','ID Evento','ID Ensayo','Folio externo Galera','Nombre productor','WhatsApp / teléfono','Cultivo','Hectáreas','Interés','Ticket estimado $','Etapa pipeline','Responsable','Fecha captura','Siguiente paso','1er toque','2º toque','Notas'],sample:['LED-001','EVE-001','ENS-001','GAL-2026-001','Productor Gómez','','Tomate',8,'Cotización',180000,'Cotización','Comercial Norte','2026-06-01','Enviar propuesta varietal','2026-06-02','2026-06-06','Lead generado desde evento.']},
-    DEMANDA_SOP:{headers:['ID Demanda','Periodo','Cultivo','Variedad','Zona','Pedidos firmes $','Pipeline ponderado $','Forecast $','Demanda semanal $'],sample:['DEM-001','Jun-Jul 2026','Tomate','Dumas','Sinaloa Norte',220000,130000,400000,90000]},
-    INVENTARIO:{headers:['ID Inventario','Cultivo','Variedad','Disponible','Comprometido','En tránsito','Demanda semanal','Lote'],sample:['INV-001','Tomate','Dumas',300000,70000,90000,90000,'Lote D-26']},
-    CARTERA:{headers:['ID CxC','Cliente','Monto $','Fecha venta','Fecha vencimiento','Fecha pago','Promesa de pago','Responsable','Moneda','Notas'],sample:['CXC-001','Productor Gómez',90000,'2026-04-01','2026-05-01','','2026-06-15','Comercial Norte','MXN','Requiere plan de pago.']},
-    SCORING:{headers:['ID Scoring','Cliente','Antigüedad 0-20','Historial pago 0-30','Volumen/ticket 0-15','Referencias 0-15','Garantías 0-20','Riesgo estacional 0-30'],sample:['SCR-001','Productor Gómez',12,12,12,10,5,18]}
+    DEMANDA_SOP:{headers:['ID Demanda','Periodo','Cultivo','Variedad','Zona','Unidad S&OP','Pedidos firmes','Pipeline ponderado','Forecast','Demanda semanal','Fuente forecast','Confianza forecast','Lead time esperado semanas','Objetivo nivel servicio %','Impacto promoción / lanzamiento','Comentario'],sample:['DEM-001','Jun-Jul 2026','Tomate','Dumas','Sinaloa Norte','$',220000,130000,400000,90000,'Pipeline comercial','Media',6,90,50000,'Forecast validado con comercial']},
+    INVENTARIO:{headers:['ID Inventario','Cultivo','Variedad','Unidad S&OP','Disponible','Comprometido','En tránsito','Pedido abierto','Demanda semanal','Stock seguridad semanas','Lead time proveedor semanas','Fecha arribo esperada','Lote'],sample:['INV-001','Tomate','Dumas','$',300000,70000,90000,120000,90000,5,6,'2026-07-15','Lote D-26']},
+    CARTERA:{headers:['ID CxC','Cliente','Monto $','Factura / referencia','Días de crédito','Fecha venta','Fecha vencimiento','Fecha pago','Promesa de pago','Monto comprometido $','Último contacto','Responsable','Moneda','Bloqueo comercial solicitado','Notas'],sample:['CXC-001','Productor Gómez',90000,'FAC-1001',30,'2026-04-01','2026-05-01','','2026-06-15',45000,'2026-06-10','Comercial Norte','MXN','Sí','Requiere plan de pago.']},
+    SCORING:{headers:['ID Scoring','Cliente','Antigüedad 0-20','Historial pago 0-20','Volumen/ticket 0-20','Referencias 0-20','Garantías 0-20','Riesgo estacional 0-20'],sample:['SCR-001','Productor Gómez',12,12,12,10,5,18]}
   }; }
   function downloadImportTemplate(){
     if(!window.XLSX){alert('La librería XLSX no está disponible.');return;}
-    const wb=XLSX.utils.book_new(); const guide=[['Plantilla guía de importación — Galera RICO v2.3'],[],['Uso'],['1) Llena solo las hojas que necesites importar.'],['2) Conserva nombres de hojas y encabezados para máxima compatibilidad.'],['3) Fechas recomendadas: AAAA-MM-DD. Números sin símbolos.'],['4) ID Ensayo es opcional, pero ayuda a conectar bitácora, resultados y leads.'],['5) El importador fusiona sin duplicar por ID, folio externo, no. externo o cultivo-productor-variedad-fecha.']];
+    const wb=XLSX.utils.book_new(); const guide=[['Plantilla guía de importación — Galera RICO v3.1'],[],['Uso'],['1) Llena solo las hojas que necesites importar.'],['2) Conserva nombres de hojas y encabezados para máxima compatibilidad.'],['3) Fechas recomendadas: AAAA-MM-DD. Números sin símbolos.'],['4) ID Ensayo es opcional, pero ayuda a conectar bitácora, resultados y leads.'],['5) El importador fusiona sin duplicar por ID, folio externo, no. externo o cultivo-productor-variedad-fecha.']];
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(guide),'00_Guia');
     Object.entries(importTemplateSpecs()).forEach(([name,spec])=>{const ws=XLSX.utils.aoa_to_sheet([spec.headers,spec.sample]); ws['!cols']=spec.headers.map(h=>({wch:Math.min(Math.max(String(h).length+2,14),32)})); XLSX.utils.book_append_sheet(wb,ws,name.slice(0,31));});
-    XLSX.writeFile(wb,'Plantilla_importacion_Galera_RICO_v2_3.xlsx');
+    XLSX.writeFile(wb,'Plantilla_importacion_Galera_RICO_v3_1.xlsx');
   }
   function findSheet(wb,names){ const targets=names.map(norm); const name=wb.SheetNames.find(s=>targets.includes(norm(s))); return name?wb.Sheets[name]:null; }
   function sheetToRows(wb,names){ const ws=findSheet(wb,names); return ws?XLSX.utils.sheet_to_json(ws,{defval:'',raw:true,cellDates:true}).filter(r=>Object.values(r).some(v=>String(v??'').trim()!=='')):[]; }
@@ -869,19 +1085,35 @@ Adjunto o adjuntaré el Excel integral del sistema para análisis completo.`;
   function resolveTrial(row,trials){ const id=String(rowVal(row,'ID Ensayo','trialId','trial_id')).trim(); const folio=String(rowVal(row,'Folio externo Galera','folioExternoGalera')).trim(); const noExt=String(rowVal(row,'No. ensayo externo','No. ensayo externo Galera','noEnsayoExterno')).trim(); return trials.find(t=>(id&&eq(t.id,id))||(folio&&eq(t.folioExternoGalera,folio))||(noExt&&eq(t.noEnsayoExterno,noExt)))?.id || id || ''; }
   function mapTrialImport(r){ return {id:String(rowVal(r,'ID Ensayo')||uid('ENS')),folioExternoGalera:String(rowVal(r,'Folio externo Galera')),noEnsayoExterno:String(rowVal(r,'No. ensayo externo','No. ensayo externo Galera')),fuenteCaptura:String(rowVal(r,'Fuente captura')||'Importado Excel'),cultivo:String(rowVal(r,'Cultivo')),variedad:String(rowVal(r,'Variedad Galera','Variedad','Variedad evaluada')),casaComercial:String(rowVal(r,'Casa comercial','Casa Comercial')),control:String(rowVal(r,'Variedad control','Variedad testigo')),proveedorControl:String(rowVal(r,'Proveedor control','Casa / proveedor testigo','Proveedor testigo')),productor:String(rowVal(r,'Productor')),clienteObjetivo:String(rowVal(r,'Cliente / cuenta objetivo','Cuenta objetivo')),tecnico:String(rowVal(r,'Técnico responsable','Tecnico responsable')),responsableComercial:String(rowVal(r,'Responsable comercial')),region:String(rowVal(r,'Región','Region')),estadoGeografico:String(rowVal(r,'Estado geográfico','Estado geografico')),municipio:String(rowVal(r,'Municipio')),gps:String(rowVal(r,'GPS','Ubicación / GPS','Ubicacion / GPS')),ciclo:String(rowVal(r,'Ciclo agrícola','Ciclo agricola')),sistema:String(rowVal(r,'Sistema','Tipo de sistema')),condicionCultivo:String(rowVal(r,'Condición de cultivo','Condicion de cultivo')),densidadPlantasHa:n(rowVal(r,'Densidad plantas/ha','Densidad (plantas/ha)','Densidad')),suelo:String(rowVal(r,'Suelo','Tipo de suelo')),riego:String(rowVal(r,'Riego','Sistema de riego')),siembra:excelDate(rowVal(r,'Fecha siembra')),cosecha:excelDate(rowVal(r,'Fecha cosecha estimada','Fecha cosecha')),superficieHa:n(rowVal(r,'Superficie ha','Superficie ensayo')),modoEnsayo:String(rowVal(r,'Tipo de ensayo Galera','Modo ensayo','Tipo ensayo')),estado:String(rowVal(r,'Estado')||'Planeado'),prioridad:String(rowVal(r,'Prioridad')||'Media'),vinculoComercial:String(rowVal(r,'Vínculo comercial','Vinculo comercial')||'Por definir'),mercadoObjetivo:String(rowVal(r,'Mercado objetivo')),segmentoObjetivo:String(rowVal(r,'Segmento objetivo')),competidorObjetivo:String(rowVal(r,'Competidor objetivo')),areaPotencialHa:n(rowVal(r,'Área potencial ha','Area potencial ha')),ticketPotencial:n(rowVal(r,'Ticket potencial')),objetivo:String(rowVal(r,'Objetivo medible')),criterio:String(rowVal(r,'Criterio éxito','Criterio exito')),hipotesis:String(rowVal(r,'Problema / hipótesis','Problema / hipotesis')),salidaComercial:String(rowVal(r,'Salida comercial esperada')),updatedAt:new Date().toISOString()}; }
   function mapEvidenceImport(r,trials){ return {id:String(rowVal(r,'ID Bitácora','ID Bitacora')||uid('BIT')),trialId:resolveTrial(r,trials),fecha:excelDate(rowVal(r,'Fecha'))||today(),responsable:String(rowVal(r,'Responsable')),etapa:String(rowVal(r,'Etapa')),tipo:String(rowVal(r,'Tipo hallazgo')),severidad:n(rowVal(r,'Severidad 1-5','Severidad')),gps:String(rowVal(r,'GPS')),foto:String(rowVal(r,'Foto / evidencia URL','Foto')),observacion:String(rowVal(r,'Observación técnica','Observacion tecnica')),accion:String(rowVal(r,'Acción correctiva','Accion correctiva')),updatedAt:new Date().toISOString()}; }
-  function mapResultImport(r,trials){ const trialId=resolveTrial(r,trials); const t=trials.find(x=>eq(x.id,trialId))||{}; const area=n(rowVal(r,'Área evaluada ha','Area evaluada ha','Superficie Ensayo (ha)','Superficie Ensayo ha'))||n(t.superficieHa)||1; const rc=n(rowVal(r,'Rend. Control ton/ha','Rendimiento Control ton/ha')); const rt=n(rowVal(r,'Rend. Galera ton/ha','Rendimiento Galera ton/ha','Rend. Tratado ton/ha')); const diffTon=rt-rc, diffKg=diffTon*1000*area, mejoraPct=rc?diffTon/rc*100:0; const precioKg=n(rowVal(r,'Precio $/kg','Precio por kg $')); const costoVariableKg=n(rowVal(r,'Costo variable $/kg','Costo de producción por kg','Costo produccion por kg')); const unitMargin=precioKg-costoVariableKg; const margen=diffKg*unitMargin; const semilla=n(rowVal(r,'Semilla $','Semillas $','Semilla')); const insumos=n(rowVal(r,'Insumos $','Insumos')); const materiales=n(rowVal(r,'Materiales $','Material $','Materiales')); const horasTec=n(rowVal(r,'Horas técnico','Horas tecnico')); const costoHora=n(rowVal(r,'Costo hora técnico $','Costo hora tecnico $','Costo por hora $')); const traslados=n(rowVal(r,'Traslados $','Traslados')); const otros=n(rowVal(r,'Otros $','Otros')); const costo=semilla+insumos+materiales+horasTec*costoHora+traslados+otros; const roiPct=costo?((margen-costo)/costo)*100:0; const evaluacion=roiPct>=30&&mejoraPct>0?'Exitoso':(roiPct>=0||mejoraPct>0?'Parcial':'No exitoso'); const recomendacion=evaluacion==='Exitoso'?'Escalar / convertir en receta':evaluacion==='Parcial'?'Repetir con ajustes técnicos/comerciales':'Detener o rediseñar antes de repetir'; const recSel=String(rowVal(r,'Recomendación comercial Galera','Recomendacion comercial Galera')||'Automática / no definida'); return {id:String(rowVal(r,'ID Resultado')||uid('RES')),trialId,fecha:excelDate(rowVal(r,'Fecha evaluación','Fecha evaluacion'))||today(),areaHa:area,rendControl:rc,rendTratado:rt,precioKg,costoVariableKg,semilla,insumos,materiales,horasTec,costoHora,traslados,otros,calidad:n(rowVal(r,'Calidad 1-5')),facilidad:n(rowVal(r,'Facilidad 1-5')),calidadComercialTexto:String(rowVal(r,'Calidad Comercial')),incidenciaPlagaPct:n(rowVal(r,'Incidencia Plaga %')),metaRoiCultivo:n(rowVal(r,'Meta ROI Cultivo')),estadoObjetivo:String(rowVal(r,'Estado Objetivo')),detalleObjetivo:String(rowVal(r,'Detalle Objetivo')),superficiePotencialProductorHa:n(rowVal(r,'Superficie Potencial Productor (ha)','Superficie Potencial Productor ha')),repetir:String(rowVal(r,'Repetir')),fechaISO:isoDate(rowVal(r,'Fecha ISO')),fechaActualizacionISO:isoDate(rowVal(r,'Fecha Actualización ISO','Fecha Actualizacion ISO')),porcentajeCosecha:n(rowVal(r,'% cosecha','% de cosecha')),sanidadGeneral:String(rowVal(r,'Sanidad general')),uniformidadPlantaFruta:String(rowVal(r,'Uniformidad planta/fruta','Uniformidad de planta/fruta')),madurez:String(rowVal(r,'Madurez')),color:String(rowVal(r,'Color')),forma:String(rowVal(r,'Forma')),calibreDominante:String(rowVal(r,'Calibre / tamaño dominante','Calibre dominante')),diametroProductoCm:n(rowVal(r,'Diámetro producto cm','Diametro producto cm','Diámetro producto (cm)')),tamanoTalloCm:n(rowVal(r,'Tamaño tallo cm','Tamano tallo cm','Tamaño de tallo (cm)')),pesoProductoG:n(rowVal(r,'Peso producto g','Peso producto (g)')),enfermedadObservada:String(rowVal(r,'Enfermedad observada')),ventajaPrincipal:String(rowVal(r,'Ventaja principal')),desventajaPrincipal:String(rowVal(r,'Desventaja principal')),comparacionVsTestigo:String(rowVal(r,'Comparación vs testigo','Comparacion vs testigo')),recomendacionComercialGalera:recSel,estatusFinalGalera:String(rowVal(r,'Estatus final Galera')),conclusion:String(rowVal(r,'Conclusión técnica','Conclusion tecnica')),implicacionComercial:String(rowVal(r,'Implicación comercial','Implicacion comercial')),diffTon,diffKg,mejoraPct,unitMargin,margen,costo,roiPct,evaluacion,recomendacion,recomendacionComercialFinal:recSel==='Automática / no definida'?recomendacion:recSel,updatedAt:new Date().toISOString()}; }
-  function mapEventImport(r){ const obj={id:String(rowVal(r,'ID Evento')||uid('EVE')),nombre:String(rowVal(r,'Nombre evento','Evento')),fecha:excelDate(rowVal(r,'Fecha')),tipo:String(rowVal(r,'Tipo')),condicion:String(rowVal(r,'Condición','Condicion')||'Nuevo'),cultivo:String(rowVal(r,'Cultivo')),zona:String(rowVal(r,'Zona')),publico:String(rowVal(r,'Público objetivo','Publico objetivo')),leadsMeta:n(rowVal(r,'Leads meta')),estrategia:n(rowVal(r,'Alineación estratégica 0-20','Alineacion estrategica 0-20')),audiencia:n(rowVal(r,'Audiencia calificada 0-20')),inventario:n(rowVal(r,'Inventario disponible 0-20')),timing:n(rowVal(r,'Timing comercial 0-20')),roiScore:n(rowVal(r,'ROI esperado 0-20')),seguimiento:n(rowVal(r,'Capacidad seguimiento 0-20')),costosDirectos:n(rowVal(r,'Costos directos $')),horasTec:n(rowVal(r,'Horas técnicas','Horas tecnicas')),costoHoraTec:n(rowVal(r,'Costo hora técnico $','Costo hora tecnico $')),horasCom:n(rowVal(r,'Horas comerciales')),costoHoraCom:n(rowVal(r,'Costo hora comercial $')),captacion:n(rowVal(r,'Captación / material $','Captacion / material $')),seguimientoCosto:n(rowVal(r,'Seguimiento post-evento $')),otros:n(rowVal(r,'Otros $')),margenAtribuible:n(rowVal(r,'Margen atribuible esperado $')),hipotesis:String(rowVal(r,'Hipótesis / razón estratégica','Hipotesis / razon estrategica')),post30:String(rowVal(r,'Post 30')),post90:String(rowVal(r,'Post 90'))}; const weights={estrategia:20,audiencia:20,inventario:15,timing:15,roi:20,seguimiento:10}; obj.score=(clamp(obj.estrategia,0,20)/20*weights.estrategia)+(clamp(obj.audiencia,0,20)/20*weights.audiencia)+(clamp(obj.inventario,0,20)/20*weights.inventario)+(clamp(obj.timing,0,20)/20*weights.timing)+(clamp(obj.roiScore,0,20)/20*weights.roi)+(clamp(obj.seguimiento,0,20)/20*weights.seguimiento); obj.cost=obj.costosDirectos+obj.horasTec*obj.costoHoraTec+obj.horasCom*obj.costoHoraCom+obj.captacion+obj.seguimientoCosto+obj.otros; obj.roiPct=obj.cost?((obj.margenAtribuible-obj.cost)/obj.cost)*100:0; obj.minRoi=obj.condicion==='Repetido'?50:(obj.tipo==='Finca demostrativa'?40:30); obj.cpl=obj.leadsMeta?obj.cost/obj.leadsMeta:0; obj.decision=obj.score>=75&&obj.roiPct>=obj.minRoi&&obj.cost>0?'GO':'NO-GO'; return obj; }
+  function mapResultImport(r,trials){
+    const trialId=resolveTrial(r,trials); const t=trials.find(x=>eq(x.id,trialId))||{}; const area=n(rowVal(r,'Área evaluada ha','Area evaluada ha','Superficie Ensayo (ha)','Superficie Ensayo ha'))||n(t.superficieHa)||1;
+    const rc=n(rowVal(r,'Rend. Control ton/ha','Rendimiento Control ton/ha')); const rt=n(rowVal(r,'Rend. Galera ton/ha','Rendimiento Galera ton/ha','Rend. Tratado ton/ha'));
+    const diffTon=rt-rc, diffKg=diffTon*1000*area, mejoraPct=rc?diffTon/rc*100:0; const precioKg=n(rowVal(r,'Precio $/kg','Precio por kg $')); const costoVariableKg=n(rowVal(r,'Costo variable $/kg','Costo de producción por kg','Costo produccion por kg'));
+    const unitMargin=precioKg-costoVariableKg; const margenBruto=diffKg*unitMargin; const semilla=n(rowVal(r,'Semilla $','Semillas $','Semilla')); const semillaControl=n(rowVal(r,'Precio semilla control $/bolsa','Semilla control $/bolsa')); const semillaGalera=n(rowVal(r,'Precio semilla Galera $/bolsa','Semilla Galera $/bolsa')); const deltaCostoSemilla=semillaGalera-semillaControl;
+    const insumos=n(rowVal(r,'Insumos $','Insumos')); const materiales=n(rowVal(r,'Materiales $','Material $','Materiales')); const horasTec=n(rowVal(r,'Horas técnico','Horas tecnico')); const costoHora=n(rowVal(r,'Costo hora técnico $','Costo hora tecnico $','Costo por hora $')); const traslados=n(rowVal(r,'Traslados $','Traslados')); const otros=n(rowVal(r,'Otros $','Otros'));
+    const costo=semilla+insumos+materiales+horasTec*costoHora+traslados+otros; const margen=margenBruto-deltaCostoSemilla; const roiPct=costo?((margen-costo)/costo)*100:0; const evaluacion=roiPct>=30&&mejoraPct>0?'Exitoso':(roiPct>=0||mejoraPct>0?'Parcial':'No exitoso'); const recomendacion=evaluacion==='Exitoso'?'Escalar / convertir en receta':evaluacion==='Parcial'?'Repetir con ajustes técnicos/comerciales':'Detener o rediseñar antes de repetir'; const recSel=String(rowVal(r,'Recomendación comercial Galera','Recomendacion comercial Galera')||'Automática / no definida');
+    return {id:String(rowVal(r,'ID Resultado')||uid('RES')),trialId,fecha:excelDate(rowVal(r,'Fecha evaluación','Fecha evaluacion'))||today(),areaHa:area,rendControl:rc,rendTratado:rt,precioKg,costoVariableKg,semilla,semillaControl,semillaGalera,deltaCostoSemilla,margenBruto,insumos,materiales,horasTec,costoHora,traslados,otros,calidad:n(rowVal(r,'Calidad 1-5')),facilidad:n(rowVal(r,'Facilidad 1-5')),calidadComercialTexto:String(rowVal(r,'Calidad Comercial')),incidenciaPlagaPct:n(rowVal(r,'Incidencia Plaga %')),metaRoiCultivo:n(rowVal(r,'Meta ROI Cultivo')),estadoObjetivo:String(rowVal(r,'Estado Objetivo')),detalleObjetivo:String(rowVal(r,'Detalle Objetivo')),superficiePotencialProductorHa:n(rowVal(r,'Superficie Potencial Productor (ha)','Superficie Potencial Productor ha')),repetir:String(rowVal(r,'Repetir')),fechaISO:isoDate(rowVal(r,'Fecha ISO')),fechaActualizacionISO:isoDate(rowVal(r,'Fecha Actualización ISO','Fecha Actualizacion ISO')),porcentajeCosecha:normalizePercentInput(rowVal(r,'% cosecha','% de cosecha')),sanidadGeneral:String(rowVal(r,'Sanidad general')),uniformidadPlantaFruta:String(rowVal(r,'Uniformidad planta/fruta','Uniformidad de planta/fruta')),madurez:String(rowVal(r,'Madurez')),color:String(rowVal(r,'Color')),forma:String(rowVal(r,'Forma')),calibreDominante:String(rowVal(r,'Calibre / tamaño dominante','Calibre dominante')),diametroProductoCm:n(rowVal(r,'Diámetro producto cm','Diametro producto cm','Diámetro producto (cm)')),tamanoTalloCm:n(rowVal(r,'Tamaño tallo cm','Tamano tallo cm','Tamaño de tallo (cm)')),pesoProductoG:n(rowVal(r,'Peso producto g','Peso producto (g)')),enfermedadObservada:String(rowVal(r,'Enfermedad observada')),ventajaPrincipal:String(rowVal(r,'Ventaja principal')),desventajaPrincipal:String(rowVal(r,'Desventaja principal')),comparacionVsTestigo:String(rowVal(r,'Comparación vs testigo','Comparacion vs testigo')),recomendacionComercialGalera:recSel,estatusFinalGalera:String(rowVal(r,'Estatus final Galera')),conclusion:String(rowVal(r,'Conclusión técnica','Conclusion tecnica')),implicacionComercial:String(rowVal(r,'Implicación comercial','Implicacion comercial')),diffTon,diffKg,mejoraPct,unitMargin,margen,costo,roiPct,evaluacion,recomendacion,recomendacionComercialFinal:recSel==='Automática / no definida'?recomendacion:recSel,updatedAt:new Date().toISOString()}; }
+  function mapEventImport(r){
+    const obj={id:String(rowVal(r,'ID Evento')||uid('EVE')),nombre:String(rowVal(r,'Nombre evento','Evento')),fecha:excelDate(rowVal(r,'Fecha')),tipo:String(rowVal(r,'Tipo')),condicion:String(rowVal(r,'Condición','Condicion')||'Nuevo'),cultivo:String(rowVal(r,'Cultivo')),zona:String(rowVal(r,'Zona')),publico:String(rowVal(r,'Público objetivo','Publico objetivo')),leadsMeta:n(rowVal(r,'Leads meta')),estrategia:normalizeEventLevel(rowVal(r,'Alineación estratégica 1-5','Alineacion estrategica 1-5','Alineación estratégica 0-20','Alineacion estrategica 0-20')),audiencia:normalizeEventLevel(rowVal(r,'Audiencia calificada 1-5','Audiencia calificada 0-20')),inventario:normalizeEventLevel(rowVal(r,'Inventario disponible 1-5','Inventario disponible 0-20')),timing:normalizeEventLevel(rowVal(r,'Timing comercial 1-5','Timing comercial 0-20')),roiScore:normalizeEventLevel(rowVal(r,'Hipótesis comercial 1-5','Hipotesis comercial 1-5','ROI esperado 0-20')),seguimiento:normalizeEventLevel(rowVal(r,'Capacidad seguimiento 1-5','Capacidad seguimiento 0-20')),costosDirectos:n(rowVal(r,'Costos directos $')),horasTec:n(rowVal(r,'Horas técnicas','Horas tecnicas')),costoHoraTec:n(rowVal(r,'Costo hora técnico $','Costo hora tecnico $')),horasCom:n(rowVal(r,'Horas comerciales')),costoHoraCom:n(rowVal(r,'Costo hora comercial $')),captacion:n(rowVal(r,'Captación / material $','Captacion / material $')),seguimientoCosto:n(rowVal(r,'Seguimiento post-evento $')),otros:n(rowVal(r,'Otros $')),margenAtribuible:n(rowVal(r,'Margen atribuible esperado $')),hipotesis:String(rowVal(r,'Hipótesis / razón estratégica','Hipotesis / razon estrategica')),post30:String(rowVal(r,'Post 30')),post90:String(rowVal(r,'Post 90'))};
+    const weights={estrategia:20,audiencia:20,inventario:15,timing:15,roi:20,seguimiento:10}; obj.score=(obj.estrategia/5*weights.estrategia)+(obj.audiencia/5*weights.audiencia)+(obj.inventario/5*weights.inventario)+(obj.timing/5*weights.timing)+(obj.roiScore/5*weights.roi)+(obj.seguimiento/5*weights.seguimiento); obj.cost=obj.costosDirectos+obj.horasTec*obj.costoHoraTec+obj.horasCom*obj.costoHoraCom+obj.captacion+obj.seguimientoCosto+obj.otros; obj.roiPct=obj.cost?((obj.margenAtribuible-obj.cost)/obj.cost)*100:0; obj.minRoi=obj.condicion==='Repetido'?50:(obj.tipo==='Finca demostrativa'?40:30); obj.cpl=obj.leadsMeta?obj.cost/obj.leadsMeta:0; obj.decision=obj.score>=75&&obj.roiPct>=obj.minRoi&&obj.estrategia>=3&&obj.audiencia>=3&&obj.seguimiento>=3&&obj.cost>0?'GO':'NO-GO'; return obj; }
   function mapLeadImport(r,trials){ return {id:String(rowVal(r,'ID Lead')||uid('LED')),eventId:String(rowVal(r,'ID Evento')),trialId:resolveTrial(r,trials),nombre:String(rowVal(r,'Nombre productor','Productor')),telefono:String(rowVal(r,'WhatsApp / teléfono','WhatsApp / telefono','Teléfono','Telefono')),cultivo:String(rowVal(r,'Cultivo')),hectareas:n(rowVal(r,'Hectáreas','Hectareas')),interes:String(rowVal(r,'Interés','Interes')),ticket:n(rowVal(r,'Ticket estimado $','Ticket')),stage:String(rowVal(r,'Etapa pipeline')||'Lead'),owner:String(rowVal(r,'Responsable')),fecha:excelDate(rowVal(r,'Fecha captura'))||today(),nextStep:String(rowVal(r,'Siguiente paso')),firstTouch:excelDate(rowVal(r,'1er toque')),secondTouch:excelDate(rowVal(r,'2º toque','2o toque')),notes:String(rowVal(r,'Notas'))}; }
-  function mapDemandImport(r){ return {id:String(rowVal(r,'ID Demanda')||uid('DEM')),periodo:String(rowVal(r,'Periodo')),cultivo:String(rowVal(r,'Cultivo')),variedad:String(rowVal(r,'Variedad')),zona:String(rowVal(r,'Zona')),pedidosFirmes:n(rowVal(r,'Pedidos firmes $','Pedidos firmes')),pipelinePonderado:n(rowVal(r,'Pipeline ponderado $','Pipeline ponderado')),forecast:n(rowVal(r,'Forecast $','Forecast')),demandaSemanal:n(rowVal(r,'Demanda semanal $','Demanda semanal'))}; }
-  function mapInventoryImport(r){ return {id:String(rowVal(r,'ID Inventario')||uid('INV')),cultivo:String(rowVal(r,'Cultivo')),variedad:String(rowVal(r,'Variedad')),disponible:n(rowVal(r,'Disponible')),comprometido:n(rowVal(r,'Comprometido')),transito:n(rowVal(r,'En tránsito','En transito')),demandaSemanal:n(rowVal(r,'Demanda semanal')),lote:String(rowVal(r,'Lote'))}; }
-  function mapAccountImport(r){ return {id:String(rowVal(r,'ID CxC')||uid('CXC')),client:String(rowVal(r,'Cliente')),amount:n(rowVal(r,'Monto $','Monto')),saleDate:excelDate(rowVal(r,'Fecha venta'))||today(),dueDate:excelDate(rowVal(r,'Fecha vencimiento')),paymentDate:excelDate(rowVal(r,'Fecha pago')),promiseDate:excelDate(rowVal(r,'Promesa de pago')),owner:String(rowVal(r,'Responsable')),currency:String(rowVal(r,'Moneda')||'MXN'),notes:String(rowVal(r,'Notas'))}; }
-  function mapScoreImport(r){ const obj={id:String(rowVal(r,'ID Scoring')||uid('SCR')),client:String(rowVal(r,'Cliente')),antiguedad:n(rowVal(r,'Antigüedad 0-20','Antiguedad 0-20')),historial:n(rowVal(r,'Historial pago 0-30')),volumen:n(rowVal(r,'Volumen/ticket 0-15')),referencias:n(rowVal(r,'Referencias 0-15')),garantias:n(rowVal(r,'Garantías 0-20','Garantias 0-20')),riesgo:n(rowVal(r,'Riesgo estacional 0-30'))}; const score=clamp(obj.antiguedad+obj.historial+obj.volumen+obj.referencias+obj.garantias-obj.riesgo,0,100); obj.score=score; obj.banda=score>=80?'A':score>=60?'B':'C'; obj.plazo=obj.banda==='A'?45:obj.banda==='B'?30:15; obj.updatedAt=now(); return obj; }
+  function mapDemandImport(r){ return {id:String(rowVal(r,'ID Demanda')||uid('DEM')),periodo:String(rowVal(r,'Periodo')),cultivo:String(rowVal(r,'Cultivo')),variedad:String(rowVal(r,'Variedad')),zona:String(rowVal(r,'Zona')),unidadSOP:String(rowVal(r,'Unidad S&OP','Unidad')||'$'),pedidosFirmes:n(rowVal(r,'Pedidos firmes $','Pedidos firmes')),pipelinePonderado:n(rowVal(r,'Pipeline ponderado $','Pipeline ponderado')),forecast:n(rowVal(r,'Forecast $','Forecast')),demandaSemanal:n(rowVal(r,'Demanda semanal $','Demanda semanal')),fuenteForecast:String(rowVal(r,'Fuente forecast','Fuente principal forecast')),confianzaForecast:String(rowVal(r,'Confianza forecast')),leadTimeSemanas:n(rowVal(r,'Lead time esperado semanas','Lead time esperado (semanas)')),objetivoServicio:n(rowVal(r,'Objetivo nivel servicio %','Objetivo nivel de servicio %')),promocionPlan:n(rowVal(r,'Impacto promoción / lanzamiento','Impacto promocion / lanzamiento')),comentario:String(rowVal(r,'Comentario','Supuesto clave / comentario'))}; }
+  function mapInventoryImport(r){ return {id:String(rowVal(r,'ID Inventario')||uid('INV')),cultivo:String(rowVal(r,'Cultivo')),variedad:String(rowVal(r,'Variedad')),unidadSOP:String(rowVal(r,'Unidad S&OP','Unidad')||'$'),disponible:n(rowVal(r,'Disponible')),comprometido:n(rowVal(r,'Comprometido')),transito:n(rowVal(r,'En tránsito','En transito')),pedidoAbierto:n(rowVal(r,'Pedido abierto')),demandaSemanal:n(rowVal(r,'Demanda semanal')),seguridadSemanas:n(rowVal(r,'Stock seguridad semanas','Stock seguridad (semanas)')),leadTimeSemanas:n(rowVal(r,'Lead time proveedor semanas','Lead time proveedor (semanas)')),fechaArribo:excelDate(rowVal(r,'Fecha arribo esperada','Fecha estimada de arribo')),lote:String(rowVal(r,'Lote'))}; }
+  function mapAccountImport(r){ return {id:String(rowVal(r,'ID CxC')||uid('CXC')),client:String(rowVal(r,'Cliente')),amount:n(rowVal(r,'Monto $','Monto')),factura:String(rowVal(r,'Factura / referencia','Factura')),diasCredito:n(rowVal(r,'Días de crédito','Dias de credito')),saleDate:excelDate(rowVal(r,'Fecha venta'))||today(),dueDate:excelDate(rowVal(r,'Fecha vencimiento')),paymentDate:excelDate(rowVal(r,'Fecha pago')),promiseDate:excelDate(rowVal(r,'Promesa de pago')),compromisoMonto:n(rowVal(r,'Monto comprometido $')),ultimoContacto:excelDate(rowVal(r,'Último contacto','Ultimo contacto')),owner:String(rowVal(r,'Responsable')),currency:String(rowVal(r,'Moneda')||'MXN'),bloqueoSolicitado:String(rowVal(r,'Bloqueo comercial solicitado')||'No'),notes:String(rowVal(r,'Notas'))}; }
+  function mapScoreImport(r){ const obj={id:String(rowVal(r,'ID Scoring')||uid('SCR')),client:String(rowVal(r,'Cliente')),antiguedad:n(rowVal(r,'Antigüedad 0-20','Antiguedad 0-20')),historial:n(rowVal(r,'Historial pago 0-20')),volumen:n(rowVal(r,'Volumen/ticket 0-20')),referencias:n(rowVal(r,'Referencias 0-20')),garantias:n(rowVal(r,'Garantías 0-20','Garantias 0-20')),riesgo:n(rowVal(r,'Riesgo estacional 0-20'))}; const score=clamp(obj.antiguedad+obj.historial+obj.volumen+obj.referencias+obj.garantias-obj.riesgo,0,100); obj.score=score; obj.banda=score>=80?'A':score>=60?'B':'C'; obj.plazo=obj.banda==='A'?45:obj.banda==='B'?30:15; obj.updatedAt=now(); return obj; }
   function importExcel(){ const file=$('excelImport')?.files?.[0]; if(!file){alert('Selecciona un archivo Excel.');return;} if(!window.XLSX){alert('La librería XLSX no está disponible.');return;} const mode=field('excelImportMode')||'preview'; const r=new FileReader(); r.onload=()=>{try{ const wb=XLSX.read(new Uint8Array(r.result),{type:'array',cellDates:true}); const trialsRows=sheetToRows(wb,['ENSAYOS','TRIALS','FICHA_ENSAYOS','FICHA DE ENSAYOS']).map(mapTrialImport).filter(x=>x.cultivo||x.variedad||x.folioExternoGalera); const tempTrials=[...read(K.trials)]; trialsRows.forEach(t=>{const idx=tempTrials.findIndex(x=>eq(x.id,t.id)||((x.folioExternoGalera&&t.folioExternoGalera)&&eq(x.folioExternoGalera,t.folioExternoGalera))||((x.noEnsayoExterno&&t.noEnsayoExterno)&&eq(x.noEnsayoExterno,t.noEnsayoExterno))||trialImportKey(x)===trialImportKey(t)); if(idx>=0)tempTrials[idx]={...tempTrials[idx],...t}; else tempTrials.push(t);}); const evRows=sheetToRows(wb,['BITACORA','BITÁCORA']).map(x=>mapEvidenceImport(x,tempTrials)).filter(x=>x.trialId||x.observacion); const resRows=sheetToRows(wb,['RESULTADOS']).map(x=>mapResultImport(x,tempTrials)).filter(x=>x.trialId||x.rendControl||x.rendTratado); const eventRows=sheetToRows(wb,['EVENTOS']).map(mapEventImport).filter(x=>x.nombre); const leadRows=sheetToRows(wb,['LEADS_PIPELINE','LEADS','PIPELINE']).map(x=>mapLeadImport(x,tempTrials)).filter(x=>x.nombre); const demRows=sheetToRows(wb,['DEMANDA_SOP','DEMANDA','SOP']).map(mapDemandImport).filter(x=>x.variedad||x.cultivo); const invRows=sheetToRows(wb,['INVENTARIO']).map(mapInventoryImport).filter(x=>x.variedad||x.cultivo); const accRows=sheetToRows(wb,['CARTERA','CUENTAS','CXC']).map(mapAccountImport).filter(x=>x.client); const scoreRows=sheetToRows(wb,['SCORING','SCORES']).map(mapScoreImport).filter(x=>x.client); const packs=[['Ensayos',trialsRows],['Bitácora',evRows],['Resultados',resRows],['Eventos',eventRows],['Leads/Pipeline',leadRows],['Demanda S&OP',demRows],['Inventario',invRows],['Cartera',accRows],['Scoring',scoreRows]]; const html=packs.map(([name,rows])=>`<div>${esc(name)}: <b>${rows.length}</b> registros detectados</div>`).join(''); if(mode==='preview'){$('excelImportResult').innerHTML=`<b>Previsualización correcta.</b><br>${html}<hr><span class="small">Cambia modo a “Fusionar sin duplicar” para guardar estos datos.</span>`; return;} const summaries=[]; summaries.push(['Ensayos',mergeMany(K.trials,trialsRows,(a,b)=>eq(a.id,b.id)||((a.folioExternoGalera&&b.folioExternoGalera)&&eq(a.folioExternoGalera,b.folioExternoGalera))||((a.noEnsayoExterno&&b.noEnsayoExterno)&&eq(a.noEnsayoExterno,b.noEnsayoExterno))||trialImportKey(a)===trialImportKey(b))]); summaries.push(['Bitácora',mergeMany(K.evidence,evRows,(a,b)=>eq(a.id,b.id))]); summaries.push(['Resultados',mergeMany(K.results,resRows,(a,b)=>eq(a.id,b.id))]); summaries.push(['Eventos',mergeMany(K.events,eventRows,(a,b)=>eq(a.id,b.id)||eq(a.nombre,b.nombre)&&eq(a.fecha,b.fecha))]); summaries.push(['Leads/Pipeline',mergeMany(K.leads,leadRows,(a,b)=>eq(a.id,b.id))]); summaries.push(['Demanda S&OP',mergeMany(K.demand,demRows,(a,b)=>eq(a.id,b.id))]); summaries.push(['Inventario',mergeMany(K.inventory,invRows,(a,b)=>eq(a.id,b.id)||`${norm(a.variedad)}_${norm(a.lote)}`===`${norm(b.variedad)}_${norm(b.lote)}`)]); summaries.push(['Cartera',mergeMany(K.accounts,accRows,(a,b)=>eq(a.id,b.id))]); summaries.push(['Scoring',mergeMany(K.scores,scoreRows,(a,b)=>eq(a.id,b.id)||eq(a.client,b.client))]); $('excelImportResult').innerHTML=`<b>Importación completada.</b><br>`+summaries.map(([name,s])=>`${esc(name)}: ${s.added} nuevos, ${s.updated} actualizados`).join('<br>'); toast('Excel importado y fusionado'); render(); }catch(err){console.error(err); alert('No pude leer el Excel. Revisa formato, hojas y encabezados.');}}; r.readAsArrayBuffer(file); }
 
   function upsert(key,obj){ const arr=read(key); const idx=arr.findIndex(x=>eq(x.id,obj.id)); if(idx>=0)arr[idx]={...arr[idx],...obj}; else arr.push(obj); write(key,arr); }
   function edit(entity,id){ state.editing[entity]=id; const pageMap={trial:'campo',evidence:'campo',result:'campo',event:'eventos',lead:'pipeline',post:'pipeline',demand:'sop',inventory:'sop',account:'cartera',score:'cartera'}; const subMap={trial:['campo','ensayos'],evidence:['campo','bitacora'],result:['campo','resultados'],event:['eventos','score'],lead:['pipeline','captura'],post:['pipeline','post'],demand:['sop','planeacion'],inventory:['sop','inventario'],account:['cartera','cuentas'],score:['cartera','score']}; if(subMap[entity])state.sub[subMap[entity][0]]=subMap[entity][1]; show(pageMap[entity]||state.page); }
   function cancelEdit(entity){ state.editing[entity]=null; render(); }
-  function remove(entity,id){ if(!confirm('¿Eliminar este registro?'))return; const keyMap={trial:K.trials,evidence:K.evidence,result:K.results,event:K.events,lead:K.leads,demand:K.demand,inventory:K.inventory,account:K.accounts,score:K.scores}; const key=keyMap[entity]; if(!key)return; write(key,read(key).filter(x=>!eq(x.id,id))); toast('Registro eliminado'); render(); }
+  function remove(entity,id){
+    const keyMap={trial:K.trials,evidence:K.evidence,result:K.results,event:K.events,lead:K.leads,demand:K.demand,inventory:K.inventory,account:K.accounts,score:K.scores}; const key=keyMap[entity]; if(!key)return;
+    if(entity==='trial'){
+      const ev=read(K.evidence).filter(x=>eq(x.trialId,id)).length, rs=read(K.results).filter(x=>eq(x.trialId,id)).length, ld=read(K.leads).filter(x=>eq(x.trialId,id)).length;
+      if((ev+rs+ld)>0 && !confirm(`Este ensayo tiene ${ev} bitácora(s), ${rs} resultado(s) y ${ld} oportunidad(es) asociadas. Si lo eliminas quedarán referencias huérfanas. ¿Eliminar de todos modos?`))return;
+    }
+    if(!confirm('¿Eliminar este registro?'))return; write(key,read(key).filter(x=>!eq(x.id,id))); toast('Registro eliminado','warn'); render(); }
+
   function isoDate(v){
     if(v instanceof Date && !isNaN(v))return v.toISOString();
     const s=String(v||'').trim(); if(!s)return '';
@@ -903,7 +1135,7 @@ Adjunto o adjuntaré el Excel integral del sistema para análisis completo.`;
     const costoHoras=n(r.horasTec)*n(r.costoHora); const costoTotal=(r.costo!==undefined)?n(r.costo):(n(r.semilla)+n(r.insumos)+n(r.materiales)+costoHoras+n(r.traslados)+n(r.otros));
     const roiRatio=(r.roi!==undefined)?n(r.roi):(r.roiPct!==undefined?n(r.roiPct)/100:(costoTotal?((margenTotal-costoTotal)/costoTotal):0));
     const mejora=(r.mejoraPct!==undefined)?n(r.mejoraPct):(n(r.rendControl)?diffTon/n(r.rendControl)*100:0); const meta=(r.metaRoiCultivo!==undefined&&r.metaRoiCultivo!=='')?n(r.metaRoiCultivo):metaRoiCultivo(t.cultivo||r.cultivo);
-    return {t,area,areaPot,diffTon,diffKgHa,diffKgTotal,unitMargin,margenHa,margenTotal,costoHoras,costoTotal,roiRatio,mejora,meta};
+    return {t,area,areaPot,diffTon,diffKgHa,diffKgTotal,unitMargin,margenHa,margenTotal,costoHoras,costoTotal,roiRatio,mejora,meta,deltaCostoSemilla:n(r.deltaCostoSemilla)};
   }
   function exportResultExampleRow(r,trials){
     const x=resultExportCore(r,trials), t=x.t; const impactoPotencial=x.areaPot?x.margenHa*x.areaPot:0;
@@ -927,6 +1159,9 @@ Adjunto o adjuntaré el Excel integral del sistema para análisis completo.`;
       'Calidad Comercial':r.calidadComercialTexto||r.calidadComercial||r.sanidadGeneral||'',
       'Incidencia Plaga %':n(r.incidenciaPlagaPct),
       'Semillas $':n(r.semilla),
+      'Precio semilla control $/bolsa':n(r.semillaControl),
+      'Precio semilla Galera $/bolsa':n(r.semillaGalera),
+      'Diferencial costo semilla $':n(r.deltaCostoSemilla),
       'Insumos $':n(r.insumos),
       'Material $':n(r.materiales),
       'Horas Técnico':n(r.horasTec),
@@ -1028,13 +1263,13 @@ Adjunto o adjuntaré el Excel integral del sistema para análisis completo.`;
   }
   function appendStyledSheet(wb,name,rows){ const headers=exportHeadersFor(name,rows); const ws=(rows&&rows.length)?XLSX.utils.json_to_sheet(rows,{header:headers}):XLSX.utils.aoa_to_sheet([headers]); styleExportSheet(ws,headers,rows||[]); XLSX.utils.book_append_sheet(wb,ws,name.slice(0,31)); }
   function exportRows(key){ if(key==='trials')return enrichTrials(read(K.trials)); if(key==='results')return enrichResults(read(K.results)); return read(key); }
-  function exportSheet(key){ const rows=exportRows(key); if(window.XLSX){const wb=XLSX.utils.book_new(); appendStyledSheet(wb,key,rows); XLSX.writeFile(wb,`Galera_${key}_v2_9.xlsx`);} else download(`${key}.json`,JSON.stringify(rows,null,2),'application/json'); }
+  function exportSheet(key){ const rows=exportRows(key); if(window.XLSX){const wb=XLSX.utils.book_new(); appendStyledSheet(wb,key,rows); XLSX.writeFile(wb,`Galera_${key}_v3_1.xlsx`);} else download(`${key}.json`,JSON.stringify(rows,null,2),'application/json'); }
   function exportVarietalPortfolio(){ return varietalPortfolio().map(x=>({'Variedad':x.variedad,'Competidor benchmark':[...x.benchmarks].filter(Boolean).join(' / '),'Cultivos':[...x.cultivos].filter(Boolean).join(', '),'Regiones':[...x.regions].filter(Boolean).join(', '),'Ensayos':x.trials,'ROI promedio %':avg(x.roi),'Mejora vs control %':avg(x.mejora),'Leads':x.leads,'Órdenes':x.orders,'Ventas cobradas $':x.sales,'Score técnico %':x.technicalScore,'Score varietal %':x.score,'Estatus Galera':x.status,'Decisión':x.decision})); }
-  function exportWorkbook(){ const d=data(); if(!window.XLSX){exportJSON();return;} const wb=XLSX.utils.book_new(); Object.entries({ensayos:enrichTrials(d.trials),bitacora:d.evidence,resultados:enrichResults(d.results),eventos:d.events,leads_pipeline:d.leads,demanda:d.demand,inventario:d.inventory,cartera:d.accounts,scoring:d.scores,portafolio_varietal:exportVarietalPortfolio(),alertas:qualityAudit().alerts,notas_variables:exportNotesRows()}).forEach(([name,rows])=>appendStyledSheet(wb,name,rows)); XLSX.writeFile(wb,'Galera_RICO_v2_9_integral.xlsx'); }
-  function exportJSON(){ const payload={version:'Galera RICO v2.9',exportedAt:new Date().toISOString(),data:data()}; download('Galera_RICO_v2_9_respaldo.json',JSON.stringify(payload,null,2),'application/json'); }
+  function exportWorkbook(){ const d=data(); if(!window.XLSX){exportJSON();return;} const wb=XLSX.utils.book_new(); Object.entries({ensayos:enrichTrials(d.trials),bitacora:d.evidence,resultados:enrichResults(d.results),eventos:d.events,leads_pipeline:d.leads,demanda:d.demand,inventario:d.inventory,cartera:d.accounts,scoring:d.scores,portafolio_varietal:exportVarietalPortfolio(),alertas:qualityAudit().alerts,notas_variables:exportNotesRows()}).forEach(([name,rows])=>appendStyledSheet(wb,name,rows)); XLSX.writeFile(wb,'Galera_RICO_v3_1_integral.xlsx'); }
+  function exportJSON(){ const payload={version:'Galera RICO v3.1',exportedAt:new Date().toISOString(),data:data()}; download('Galera_RICO_v3_1_respaldo.json',JSON.stringify(payload,null,2),'application/json'); }
   function download(filename,content,type){ const blob=new Blob([content],{type}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
   function importJSON(){ const file=$('jsonImport')?.files?.[0]; if(!file){alert('Selecciona un archivo JSON.');return;} const r=new FileReader(); r.onload=()=>{try{const obj=JSON.parse(r.result); const dd=obj.data||obj; Object.entries({trials:K.trials,evidence:K.evidence,results:K.results,events:K.events,leads:K.leads,demand:K.demand,inventory:K.inventory,accounts:K.accounts,scores:K.scores}).forEach(([k,key])=>{if(Array.isArray(dd[k]))write(key,dd[k]);}); toast('JSON importado'); render();}catch(e){alert('JSON inválido.');}}; r.readAsText(file); }
-  function clearAll(){ if(!confirm('Esto borra los datos locales v2. ¿Continuar?'))return; Object.values(K).forEach(k=>localStorage.removeItem(storeKey(k))); toast('Datos v2 borrados'); render(); }
+  function clearAll(){ if(!confirm('Esto borra los datos locales del sistema. ¿Continuar?'))return; Object.values(K).forEach(k=>localStorage.removeItem(storeKey(k))); toast('Datos locales borrados','warn'); render(); }
   function printReport(){ window.print(); }
   function printRecipe(id){ window.print(); }
   function seedDemo(){
@@ -1061,7 +1296,7 @@ Adjunto o adjuntaré el Excel integral del sistema para análisis completo.`;
 
   function init(){ buildNav(); migrateOldSilently(); show('dashboard'); }
   function migrateOldSilently(){ if(read(K.trials).length)return; try{const old=JSON.parse(localStorage.getItem('ensayos')||'[]'); if(old.length){write(K.trials,old.map(mapOldTrial));}}catch(e){} }
-  return {init,show,sub,render,applyIntelFilters,clearIntelFilters,applyIntelPreset,saveIntelWeights,resetIntelWeights,changeRadarVar,generateRicoBrief,copyRicoBrief,downloadRicoBrief,exportRicoJSON,openRicoAgent,saveTrial,saveEvidence,prefillResult,previewResult,saveResult,createLeadFromTrial,printRecipe,previewEvent,saveEvent,saveLead,savePost,quickLead,saveDemand,saveInventory,previewScore,saveScore,saveAccount,edit,cancelEdit,remove,exportWorkbook,exportSheet,exportJSON,importJSON,downloadImportTemplate,importExcel,clearAll,printReport,seedDemo,migrateOld};
+  return {init,show,sub,render,setTrialFilter,setPipeFilter,applyIntelFilters,clearIntelFilters,applyIntelPreset,saveIntelWeights,resetIntelWeights,changeRadarVar,generateRicoBrief,copyRicoBrief,downloadRicoBrief,exportRicoJSON,openRicoAgent,saveTrial,saveEvidence,prefillResult,previewResult,saveResult,createLeadFromTrial,printRecipe,previewEvent,saveEvent,saveLead,savePost,quickLead,saveDemand,saveInventory,previewScore,saveScore,saveAccount,edit,cancelEdit,remove,exportWorkbook,exportSheet,exportJSON,importJSON,downloadImportTemplate,importExcel,clearAll,printReport,seedDemo,migrateOld};
 })();
 document.addEventListener('DOMContentLoaded',APP.init);
 </script>
