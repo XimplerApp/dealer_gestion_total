@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Galera RICO v4.0.5 — Coherencia Integral, Candados y Permisos por Módulo · Sistema Integral Dealer Semillas + Agente RICO</title>
+<title>Galera RICO v4.0.6 — Coherencia Integral, Candados y Permisos por Módulo · Sistema Integral Dealer Semillas + Agente RICO</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -288,7 +288,7 @@ button[disabled]{opacity:.48;cursor:not-allowed;transform:none!important;box-sha
 @media(max-width:900px){.login-hero{grid-template-columns:1fr}.login-copy,.login-form{padding:24px}.login-copy h1{font-size:26px}}
 
 /* =====================================================
-   GALERA RICO v4.0.5 — Candados de coherencia integral
+   GALERA RICO v4.0.6 — Candados de coherencia integral
    ===================================================== */
 .lock-note{border-left:5px solid var(--orange)!important;background:#fff7ed!important;color:#7c2d12!important;}
 .derived-stage{font-size:11px;color:#64748b;margin-top:3px;line-height:1.25;}
@@ -298,13 +298,48 @@ button[disabled]{opacity:.48;cursor:not-allowed;transform:none!important;box-sha
 .metric-split .mini b{display:block;color:#075985;font-size:12px;}
 .metric-split .mini span{font-size:16px;font-weight:1000;}
 
+
+/* =====================================================
+   GALERA RICO v4.0.6 — Usuarios: alto dinámico de tabla
+   La lista de usuarios aprovecha la columna disponible y solo muestra scroll
+   cuando los registros superan el espacio visible del panel.
+   ===================================================== */
+#page-usuarios .user-admin-grid{
+  display:grid;
+  grid-template-columns:minmax(430px,.92fr) minmax(520px,1.08fr);
+  gap:14px;
+  align-items:stretch;
+}
+#page-usuarios .user-form-card,
+#page-usuarios .users-panel{min-width:0;}
+#page-usuarios .users-panel{
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+}
+#page-usuarios .users-panel>h2,
+#page-usuarios .users-panel>.notice{flex:0 0 auto;}
+#page-usuarios .users-panel .table-wrap.users-table{
+  flex:1 1 auto;
+  min-height:290px;
+  max-height:calc(100vh - 330px);
+  overflow:auto;
+  overscroll-behavior:contain;
+}
+#page-usuarios .users-panel .table-wrap.users-table table{min-width:720px;}
+#page-usuarios .users-panel .users-local-warning{margin-top:12px;}
+@media(max-width:1080px){
+  #page-usuarios .user-admin-grid{grid-template-columns:1fr;}
+  #page-usuarios .users-panel .table-wrap.users-table{min-height:260px;max-height:70vh;}
+}
+
 </style>
 </head>
 <body>
 <div class="app auth-locked" id="appShell">
   <aside class="sidebar">
     <div class="brand">
-      <h1>🌾 Galera RICO v4.0.5</h1>
+      <h1>🌾 Galera RICO v4.0.6</h1>
       <p>Sistema integral para dealer de semillas: campo, eventos, pipeline, S&OP, cartera e inteligencia varietal.</p>
     </div>
     <div class="nav" id="nav"></div>
@@ -339,7 +374,7 @@ button[disabled]{opacity:.48;cursor:not-allowed;transform:none!important;box-sha
 <script>
 const APP = (()=>{
   'use strict';
-  const VERSION='4.0.5';
+  const VERSION='4.0.6';
   const STORE_PREFIX='galera_rico_v2_';
   const K={trials:'trials',evidence:'evidence',results:'results',events:'events',leads:'leads',demand:'demand',inventory:'inventory',accounts:'accounts',scores:'scores',clients:'clients',payments:'payments',unlocks:'unlocks',promises:'promises',policies:'policies',importBatches:'importBatches',settings:'settings'};
   const AUTH={users:'auth_users',session:'auth_session',audit:'auth_audit'};
@@ -512,7 +547,7 @@ const APP = (()=>{
   function renderLogin(){
     const hasUsers=users().length>0; const el=$('loginScreen'); if(!el)return;
     $('appShell')?.classList.add('auth-locked'); el.classList.remove('hidden');
-    el.innerHTML=`<div class="login-card"><div class="login-hero"><div class="login-copy"><div><h1>🌾 Galera RICO v4.0.5</h1><p>Sistema integral con login local, roles y permisos para proteger captura, importaciones, borrado de datos y administración de usuarios.</p><div class="notice info" style="background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.16);color:#e0f2fe"><b>Flujo:</b> inicia sesión → entra a la herramienta → si tienes permiso, entra al Administrador de Usuarios.</div></div><p class="small">Nota técnica: esta versión controla permisos en el navegador. Para seguridad real multi-equipo se recomienda conectar backend, base de datos y autenticación del servidor.</p></div><div class="login-form">${hasUsers?loginFormHtml():setupFormHtml()}</div></div></div>`;
+    el.innerHTML=`<div class="login-card"><div class="login-hero"><div class="login-copy"><div><h1>🌾 Galera RICO v4.0.6</h1><p>Sistema integral con login local, roles y permisos para proteger captura, importaciones, borrado de datos y administración de usuarios.</p><div class="notice info" style="background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.16);color:#e0f2fe"><b>Flujo:</b> inicia sesión → entra a la herramienta → si tienes permiso, entra al Administrador de Usuarios.</div></div><p class="small">Nota técnica: esta versión controla permisos en el navegador. Para seguridad real multi-equipo se recomienda conectar backend, base de datos y autenticación del servidor.</p></div><div class="login-form">${hasUsers?loginFormHtml():setupFormHtml()}</div></div></div>`;
     setTimeout(()=>{ const first=hasUsers?$('login_username'):$('setup_name'); first?.focus(); },50);
   }
   function loginFormHtml(){return `<h2>Acceso de usuario</h2><label>Usuario</label><input id="login_username" autocomplete="username" onkeydown="if(event.key==='Enter')APP.login()"><label>Contraseña</label><input id="login_password" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')APP.login()"><div class="actions"><button class="btn-primary" onclick="APP.login()">Entrar a herramienta</button></div><div class="notice info" style="margin-top:12px"><b>Permisos activos:</b> captura, edición, eliminación, importación, borrado, exportación y usuarios se gobiernan por rol.</div><details class="form-guide" style="margin-top:12px"><summary>🔐 Reparar acceso administrador local</summary><p class="small muted">Úsalo solamente si el navegador conserva usuarios pero rechaza la contraseña correcta. No borra ensayos, cartera, pipeline, importaciones ni datos operativos; solo restablece el acceso del administrador local.</p><label>Usuario administrador a reparar</label><input id="recover_username" placeholder="admin"><label>Nueva contraseña</label><input id="recover_password" type="password" autocomplete="new-password" placeholder="mínimo 8 caracteres"><label>Confirmación de seguridad</label><input id="recover_phrase" placeholder="Escribe: RECUPERAR ADMIN"><div class="actions"><button class="btn-warning" onclick="APP.recoverAdminAccess()">Reparar contraseña administrador</button></div></details>`;}
@@ -554,7 +589,27 @@ const APP = (()=>{
   function deleteUser(id){ if(!requirePerm('manageUsers','administrar usuarios'))return; const u=currentUser(); if(u&&eq(u.id,id)){alert('No puedes eliminar tu propio usuario activo.');return;} const target=users().find(x=>eq(x.id,id)); if(!target)return; if(!confirm('¿Eliminar usuario '+target.username+'?'))return; const next=users().filter(x=>!eq(x.id,id)); if(!hasActiveAdmin(next)){alert('Debe quedar al menos un administrador activo.');return;} saveUsers(next); audit('user_delete',target.username); toast('Usuario eliminado','warn'); render(); }
   function renderUsuarios(){ if(!requirePerm('manageUsers','administrar usuarios')){show('dashboard');return;} const arr=users(); const editing=arr.find(x=>eq(x.id,state.editing.user)); const perms=editing?normalizePerms(editing.perms,editing.role):rolePerms('captura'); const rows=arr.map(u=>`<tr><td><b>${esc(u.name)}</b><br><span class="small muted">${esc(u.username)}</span></td><td>${pill(roleLabel(u.role),u.role==='admin'?'purple':u.role==='captura'?'blue':'yellow')}</td><td>${pill(u.status||'Activo',u.status==='Activo'?'green':'red')}</td><td>${Object.entries(normalizePerms(u.perms,u.role)).filter(x=>x[1]).map(([k])=>`<span class="pill blue">${esc(k)}</span>`).join(' ')}</td><td>${esc(u.lastLogin||'—')}</td><td><div class="actions no-margin"><button class="btn-warning btn-sm" onclick="APP.editUser('${esc(u.id)}')">✏️</button><button class="btn-danger btn-sm" onclick="APP.deleteUser('${esc(u.id)}')">🗑</button></div></td></tr>`);
     const aud=authRead(AUTH.audit,[]).slice(0,30).map(a=>`<tr><td>${esc(a.at)}</td><td>${esc(a.nombre||a.usuario)}</td><td>${esc(a.action)}</td><td>${esc(a.detail)}</td></tr>`);
-    $('page-usuarios').innerHTML=`<div class="grid-2"><div class="card"><div class="section-title"><h2>${editing?'Editar usuario':'Nuevo usuario'}</h2>${pill('Gobierno v4.0','purple')}</div><div class="notice info"><b>Roles base:</b> Administrador controla todo; Captura puede alimentar y editar sin borrar ni importar; Dirección consulta y exporta; Solo consulta no modifica información.</div>${editing?`<div class="notice warn editing-banner"><b>Modo edición:</b> estás modificando a ${esc(editing.username)}. Si no quieres guardar cambios, usa “Cancelar cambios / Nuevo usuario”.</div>`:''}<div class="grid-2"><div><label>Nombre *</label><input id="usr_name"></div><div><label>Usuario *</label><input id="usr_username" autocomplete="username"></div><div><label>Rol</label><select id="usr_role" onchange="APP.applyRolePresetForm()"><option value="admin">Administrador</option><option value="captura" selected>Captura operativa</option><option value="direccion">Dirección / consulta ejecutiva</option><option value="consulta">Solo consulta</option></select></div><div><label>Estatus</label><select id="usr_status"><option>Activo</option><option>Inactivo</option></select></div><div class="grid-full"><label>Contraseña ${editing?'nueva (dejar vacío para conservar)':'inicial *'}</label><input id="usr_password" type="password" autocomplete="new-password" placeholder="mínimo 8 caracteres"></div></div><h3>Permisos granulares</h3><div class="permission-grid">${permissionCards(perms)}</div><div class="actions"><button class="btn-success" onclick="APP.saveUser()">${editing?'Guardar cambios':'Guardar usuario'}</button>${editing?`<button class="btn-secondary" onclick="APP.cancelUserEdit()">Cancelar cambios / Nuevo usuario</button>`:`<button class="btn-secondary" onclick="APP.resetUserForm()">Limpiar formulario</button>`}</div></div><div class="card"><h2>Usuarios activos y permisos</h2><div class="notice info"><b>Vista limitada:</b> la tabla de usuarios queda contenida con scroll vertical cuando crezca la lista.</div>${table(['Usuario','Rol','Estado','Permisos','Último acceso','Acciones'],rows,'users-table')}<div class="notice warn"><b>Importante:</b> en modo archivo local, estos permisos viven en este navegador. Para usuarios reales compartidos entre equipos, conecta backend con base de datos, sesiones y contraseñas hasheadas en servidor.</div></div></div><div class="card"><div class="section-title"><h2>Bitácora de accesos y cambios</h2>${pill('Últimos 30 movimientos','blue')}</div><div class="notice info"><b>Vista limitada:</b> la bitácora queda contenida en un panel con scroll vertical para que la pantalla no crezca indefinidamente.</div>${table(['Fecha','Usuario','Acción','Detalle'],aud,'bounded-table')}</div>`; loadUserForm(editing); }
+    $('page-usuarios').innerHTML=`<div class="user-admin-grid"><div class="card user-form-card"><div class="section-title"><h2>${editing?'Editar usuario':'Nuevo usuario'}</h2>${pill('Gobierno v4.0','purple')}</div><div class="notice info"><b>Roles base:</b> Administrador controla todo; Captura puede alimentar y editar sin borrar ni importar; Dirección consulta y exporta; Solo consulta no modifica información.</div>${editing?`<div class="notice warn editing-banner"><b>Modo edición:</b> estás modificando a ${esc(editing.username)}. Si no quieres guardar cambios, usa “Cancelar cambios / Nuevo usuario”.</div>`:''}<div class="grid-2"><div><label>Nombre *</label><input id="usr_name"></div><div><label>Usuario *</label><input id="usr_username" autocomplete="username"></div><div><label>Rol</label><select id="usr_role" onchange="APP.applyRolePresetForm()"><option value="admin">Administrador</option><option value="captura" selected>Captura operativa</option><option value="direccion">Dirección / consulta ejecutiva</option><option value="consulta">Solo consulta</option></select></div><div><label>Estatus</label><select id="usr_status"><option>Activo</option><option>Inactivo</option></select></div><div class="grid-full"><label>Contraseña ${editing?'nueva (dejar vacío para conservar)':'inicial *'}</label><input id="usr_password" type="password" autocomplete="new-password" placeholder="mínimo 8 caracteres"></div></div><h3>Permisos granulares</h3><div class="permission-grid">${permissionCards(perms)}</div><div class="actions"><button class="btn-success" onclick="APP.saveUser()">${editing?'Guardar cambios':'Guardar usuario'}</button>${editing?`<button class="btn-secondary" onclick="APP.cancelUserEdit()">Cancelar cambios / Nuevo usuario</button>`:`<button class="btn-secondary" onclick="APP.resetUserForm()">Limpiar formulario</button>`}</div></div><div class="card users-panel"><h2>Usuarios activos y permisos</h2><div class="notice info"><b>Vista dinámica:</b> la tabla aprovecha toda la altura disponible de esta columna y activa scroll vertical solo cuando la lista rebasa el panel.</div>${table(['Usuario','Rol','Estado','Permisos','Último acceso','Acciones'],rows,'users-table')}<div class="notice warn users-local-warning"><b>Importante:</b> en modo archivo local, estos permisos viven en este navegador. Para usuarios reales compartidos entre equipos, conecta backend con base de datos, sesiones y contraseñas hasheadas en servidor.</div></div></div><div class="card"><div class="section-title"><h2>Bitácora de accesos y cambios</h2>${pill('Últimos 30 movimientos','blue')}</div><div class="notice info"><b>Vista limitada:</b> la bitácora queda contenida en un panel con scroll vertical para que la pantalla no crezca indefinidamente.</div>${table(['Fecha','Usuario','Acción','Detalle'],aud,'bounded-table')}</div>`; loadUserForm(editing); fitUsersTable(); }
+  function fitUsersTable(){
+    const panel=document.querySelector('#page-usuarios .users-panel');
+    const wrap=document.querySelector('#page-usuarios .users-panel .table-wrap.users-table');
+    if(!panel||!wrap)return;
+    requestAnimationFrame(()=>{
+      wrap.style.maxHeight='';
+      const warn=panel.querySelector('.users-local-warning');
+      const pr=panel.getBoundingClientRect();
+      const wr=wrap.getBoundingClientRect();
+      const cs=getComputedStyle(panel);
+      const padBottom=parseFloat(cs.paddingBottom)||18;
+      const warnH=warn?warn.getBoundingClientRect().height+12:0;
+      let available=Math.floor(pr.bottom-wr.top-warnH-padBottom);
+      const min=window.innerWidth<=1080?260:290;
+      if(!Number.isFinite(available)||available<min)available=min;
+      wrap.style.maxHeight=available+'px';
+      wrap.style.overflowY='auto';
+    });
+  }
+  window.addEventListener('resize',()=>{ if(state.page==='usuarios') fitUsersTable(); });
   function pill(text,type='blue'){return `<span class="pill ${type}">${esc(text)}</span>`}
   function clsScore(v,good=75,warn=50){v=n(v); return v>=good?'good':v>=warn?'warn':'bad'}
   function kpi(label,value,sub='',cls='info'){return `<div class="kpi ${cls}"><div class="label">${label}</div><div class="value">${value}</div>${sub?`<div class="sub">${sub}</div>`:''}</div>`}
@@ -753,7 +808,7 @@ const APP = (()=>{
       </div>
       <div class="split" style="margin-top:18px">
         <div class="card"><div class="section-title"><h2>🚨 Alertas que requieren decisión</h2><button class="btn-secondary btn-sm" onclick="APP.show('calidad')">Ver auditoría completa</button></div>${m.quality.alerts.slice(0,8).map(a=>`<div class="notice ${a.sev}"><b>${esc(a.area)}:</b> ${esc(a.msg)}<br><span class="small">Acción: ${esc(a.action)}</span></div>`).join('')||'<div class="notice good">Sin alertas críticas con los datos actuales.</div>'}</div>
-        <div class="card"><h2>🔗 Flujo operativo recomendado</h2><div class="notice info"><b>Ensayo → Evidencia → Resultado/ROI → Receta → Lead/Pipeline → Orden → Entrega → Factura → Cobro → S&OP → Dirección.</b></div><div class="notice warn"><b>v4.0.5:</b> Orden, factura y cobro se reportan separados. Factura nace de CxC; cobro solo cuenta con pagos aplicados.</div><hr><p class="muted">El sistema elimina variables sueltas: una ficha técnica sin evidencia no genera ROI; un ROI exitoso sin lead se considera fuga comercial; una venta sin cobro no cuenta como resultado completo; una demanda sin inventario detona riesgo S&OP.</p></div>
+        <div class="card"><h2>🔗 Flujo operativo recomendado</h2><div class="notice info"><b>Ensayo → Evidencia → Resultado/ROI → Receta → Lead/Pipeline → Orden → Entrega → Factura → Cobro → S&OP → Dirección.</b></div><div class="notice warn"><b>v4.0.6:</b> Orden, factura y cobro se reportan separados. Factura nace de CxC; cobro solo cuenta con pagos aplicados.</div><hr><p class="muted">El sistema elimina variables sueltas: una ficha técnica sin evidencia no genera ROI; un ROI exitoso sin lead se considera fuga comercial; una venta sin cobro no cuenta como resultado completo; una demanda sin inventario detona riesgo S&OP.</p></div>
       </div>
       <div class="card"><h2>🧠 Lectura ejecutiva automática</h2>${executiveText(m)}</div>`;
   }
@@ -1165,7 +1220,7 @@ const APP = (()=>{
   function renderSOPDash(){
     const m=calcSOP(); const c=calcCartera();
     const rows=(m.groups||[]).map(g=>{const unit=g.unit||sopVarUnit(g.dem,g.inv); const pedidos=sum(g.dem.map(x=>x.pedidosFirmes)); const forecast=sum(g.dem.map(x=>x.forecast)); const real=sum(g.dem.map(x=>x.ventaReal)); const mapeVals=g.dem.map(sopMapeRow).filter(x=>x!==null); const mape=mapeVals.length?avg(mapeVals):null; const net=sum(g.inv.map(x=>n(x.disponible)-n(x.comprometido)+n(x.transito)+n(x.pedidoAbierto))); const weekly=sum(g.dem.map(x=>x.demandaSemanal))||sum(g.inv.map(x=>x.demandaSemanal)); const cov=weekly?net/weekly:0; const seguridad=avg(g.inv.map(x=>n(x.seguridadSemanas)))||5; let decision='Mantener'; if(net<pedidos)decision='Comprar / reasignar urgente'; else if(cov<seguridad)decision='Reabastecer'; else if(cov>8)decision='Sobrestock: activar venta'; return `<tr><td>${esc(g.cultivo||'—')}</td><td>${esc(g.variedad||'—')}</td><td>${esc(g.zona||'—')}</td><td>${esc(unit)}</td><td>${fmtSOP(pedidos,unit)}</td><td>${fmtSOP(forecast,unit)}</td><td>${real?fmtSOP(real,unit):'—'}</td><td>${mape===null?pill('Sin real','yellow'):pill(pct(mape),mape<=20?'green':mape<=35?'yellow':'red')}</td><td>${fmtSOP(net,unit)}</td><td>${dec(cov,1)} sem</td><td>${dec(seguridad,1)} sem</td><td>${decision.includes('urgente')?pill(decision,'red'):decision.includes('Sobrestock')?pill(decision,'yellow'):pill(decision,'green')}</td></tr>`});
-    $('sop_content').innerHTML=`<div class="kpi-grid">${kpi('Fill-rate pedidos firmes',pct(m.fillRate),'Valor cubierto / pedidos firmes por llave compuesta',m.fillRate>=90?'good':m.fillRate>=75?'warn':'bad')}${kpi('Llaves S&OP',int(m.vars),'Cultivo + variedad + zona + unidad','info')}${kpi('MAPE forecast',m.mapeCount?pct(m.mape):'Sin venta real',`${m.mapeCount} registro(s) con real capturado · Bias ${m.mapeCount?pct(m.bias):'—'}`,!m.mapeCount?'warn':m.mape<=20?'good':m.mape<=35?'warn':'bad')}${kpi('Riesgos stockout',int(m.stockouts),'Llaves sin cobertura firme',m.stockouts?'bad':'good')}${kpi('Cobertura promedio',dec(m.coverage,1)+' sem','Meta 5–7 semanas',m.coverage>=5&&m.coverage<=7?'good':m.coverage>=3?'warn':'bad')}${kpi('Demanda liberable',money(c.demandLiberable),'Pipeline con crédito/contado liberable','good')}${kpi('Demanda bloqueada',money(c.demandBlocked),'No comprar/reservar sin desbloqueo',c.demandBlocked?'bad':'good')}${kpi('Pedidos abiertos',fmtSOP(m.openPO,'$'),'Órdenes aún no recibidas; ver tabla por unidad','info')}</div><div class="card"><h2>Decisión S&OP por llave compuesta</h2>${table(['Cultivo','Variedad','Zona','Unidad','Pedidos firmes','Forecast','Real','MAPE','Inventario neto','Cobertura','Seguridad','Decisión'],rows)}</div><div class="card"><h2>Regla S&OP + crédito</h2><div class="notice warn"><b>v4.0.5:</b> el cálculo ya no agrupa solo por variedad. Usa llave compuesta <b>cultivo + variedad + zona + unidad</b> para evitar mezclar bolsas, kg, pesos o zonas distintas.</div><div class="notice info"><b>Demanda bloqueada:</b> no debe detonar compra, reserva ni surtido hasta que exista pago, score vigente, límite disponible o desbloqueo específico.</div></div>`;
+    $('sop_content').innerHTML=`<div class="kpi-grid">${kpi('Fill-rate pedidos firmes',pct(m.fillRate),'Valor cubierto / pedidos firmes por llave compuesta',m.fillRate>=90?'good':m.fillRate>=75?'warn':'bad')}${kpi('Llaves S&OP',int(m.vars),'Cultivo + variedad + zona + unidad','info')}${kpi('MAPE forecast',m.mapeCount?pct(m.mape):'Sin venta real',`${m.mapeCount} registro(s) con real capturado · Bias ${m.mapeCount?pct(m.bias):'—'}`,!m.mapeCount?'warn':m.mape<=20?'good':m.mape<=35?'warn':'bad')}${kpi('Riesgos stockout',int(m.stockouts),'Llaves sin cobertura firme',m.stockouts?'bad':'good')}${kpi('Cobertura promedio',dec(m.coverage,1)+' sem','Meta 5–7 semanas',m.coverage>=5&&m.coverage<=7?'good':m.coverage>=3?'warn':'bad')}${kpi('Demanda liberable',money(c.demandLiberable),'Pipeline con crédito/contado liberable','good')}${kpi('Demanda bloqueada',money(c.demandBlocked),'No comprar/reservar sin desbloqueo',c.demandBlocked?'bad':'good')}${kpi('Pedidos abiertos',fmtSOP(m.openPO,'$'),'Órdenes aún no recibidas; ver tabla por unidad','info')}</div><div class="card"><h2>Decisión S&OP por llave compuesta</h2>${table(['Cultivo','Variedad','Zona','Unidad','Pedidos firmes','Forecast','Real','MAPE','Inventario neto','Cobertura','Seguridad','Decisión'],rows)}</div><div class="card"><h2>Regla S&OP + crédito</h2><div class="notice warn"><b>v4.0.6:</b> el cálculo ya no agrupa solo por variedad. Usa llave compuesta <b>cultivo + variedad + zona + unidad</b> para evitar mezclar bolsas, kg, pesos o zonas distintas.</div><div class="notice info"><b>Demanda bloqueada:</b> no debe detonar compra, reserva ni surtido hasta que exista pago, score vigente, límite disponible o desbloqueo específico.</div></div>`;
   }
 
 
