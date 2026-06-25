@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Galera RICO v3.9 — Executive Agro UI · Sistema Integral Dealer Semillas + Agente RICO</title>
+<title>Galera RICO v3.9.1 — Executive Agro UI · Sistema Integral Dealer Semillas + Agente RICO</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -260,7 +260,7 @@ td:last-child,th:last-child{background:#f8fafc;}
 <div class="app">
   <aside class="sidebar">
     <div class="brand">
-      <h1>🌾 Galera RICO v3.9</h1>
+      <h1>🌾 Galera RICO v3.9.1</h1>
       <p>Sistema integral para dealer de semillas: campo, eventos, pipeline, S&OP, cartera e inteligencia varietal.</p>
     </div>
     <div class="nav" id="nav"></div>
@@ -290,7 +290,7 @@ td:last-child,th:last-child{background:#f8fafc;}
 <script>
 const APP = (()=>{
   'use strict';
-  const VERSION='3.9';
+  const VERSION='3.9.1';
   const STORE_PREFIX='galera_rico_v2_';
   const K={trials:'trials',evidence:'evidence',results:'results',events:'events',leads:'leads',demand:'demand',inventory:'inventory',accounts:'accounts',scores:'scores',clients:'clients',payments:'payments',unlocks:'unlocks',promises:'promises',policies:'policies',importBatches:'importBatches',settings:'settings'};
   const pages=[
@@ -1209,7 +1209,7 @@ Adjunto o adjuntaré el Excel integral del sistema para análisis completo.`;
     <div class="grid-2"><div class="card"><h2>Exportar</h2><p class="muted">Descarga datos en Excel, respaldo JSON o reporte imprimible.</p><div class="actions"><button class="btn-success" onclick="APP.exportWorkbook()">📤 Excel integral</button><button class="btn-secondary" onclick="APP.exportJSON()">💾 Respaldo JSON</button><button class="btn-primary" onclick="APP.printReport()">🖨 Reporte PDF / imprimir</button><button class="btn-purple" onclick="APP.show('agente')">🤖 Enviar a Agente RICO</button></div></div><div class="card"><h2>Respaldo / restauración JSON</h2><p class="muted">Restauración técnica completa. Usa JSON solo con respaldos generados por esta herramienta; para datos operativos editables usa Excel.</p><div class="notice warn"><b>Advertencia:</b> restaurar JSON puede reemplazar datos, IDs, relaciones, configuraciones, reglas financieras y bitácoras locales.</div><input type="file" id="jsonImport" accept="application/json"><div class="actions"><button class="btn-primary" onclick="APP.importJSON()">Importar respaldo JSON</button></div><div class="notice info" style="margin-top:12px"><b>Diferencia clave:</b> Excel alimenta datos operativos por hoja; JSON restaura una copia completa del sistema con IDs, relaciones, configuraciones y bitácoras.</div></div></div><div class="card"><details><summary style="cursor:pointer;font-weight:1000;color:#075985">⚙️ Mantenimiento avanzado</summary><div class="notice warn" style="margin-top:12px"><b>Zona de cuidado:</b> usa estas acciones solo para capacitación, pruebas o reinicio controlado. Antes de borrar datos locales, descarga un respaldo JSON.</div><div class="actions"><button class="btn-warning" onclick="APP.seedDemo()">Cargar datos demo</button><button class="btn-danger" onclick="APP.clearAll()">Borrar datos locales</button></div></details></div><div class="card"><h2>Checklist de uso semanal</h2><div class="notice info">Lunes: revisar dashboard y cartera. Miércoles: seguimiento leads y eventos. Viernes: ensayos, evidencia, S&OP y decisiones de compra/promoción.</div></div>`; }
   function downloadImportTemplate(){
     if(!window.XLSX){alert('La librería XLSX no está disponible.');return;}
-    const wb=XLSX.utils.book_new(); const guide=[['Plantilla guía de importación — Galera RICO v3.9'],[],['Uso'],['1) Llena solo las hojas que necesites importar.'],['2) Conserva nombres de hojas y encabezados para máxima compatibilidad.'],['3) Fechas recomendadas: AAAA-MM-DD. Números sin símbolos.'],['4) ID Ensayo es opcional, pero ayuda a conectar bitácora, resultados y leads.'],['5) El importador usa claves naturales: cliente normalizado/RFC/teléfono, factura+cliente+monto+fecha, pago+referencia, promesa+fecha+monto y operación de desbloqueo.'],['6) Los campos vacíos importados no sobrescriben datos existentes. Los conflictos se bloquean y se reportan por fila.']];
+    const wb=XLSX.utils.book_new(); const guide=[['Plantilla guía de importación — Galera RICO v3.9.1'],[],['Uso'],['1) Llena solo las hojas que necesites importar.'],['2) Conserva nombres de hojas y encabezados para máxima compatibilidad.'],['3) Fechas recomendadas: AAAA-MM-DD. Números sin símbolos.'],['4) ID Ensayo es opcional, pero ayuda a conectar bitácora, resultados y leads.'],['5) El importador usa claves naturales: cliente normalizado/RFC/teléfono, factura+cliente+monto+fecha, pago+referencia, promesa+fecha+monto y operación de desbloqueo.'],['6) Los campos vacíos importados no sobrescriben datos existentes. Los conflictos se bloquean y se reportan por fila.']];
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(guide),'00_Guia');
     Object.entries(importTemplateSpecs()).forEach(([name,spec])=>{const ws=XLSX.utils.aoa_to_sheet([spec.headers,spec.sample]); ws['!cols']=spec.headers.map(h=>({wch:Math.min(Math.max(String(h).length+2,14),32)})); XLSX.utils.book_append_sheet(wb,ws,name.slice(0,31));});
     XLSX.writeFile(wb,'Plantilla_importacion_Galera_RICO_v3_9.xlsx');
@@ -1525,6 +1525,34 @@ Adjunto o adjuntaré el Excel integral del sistema para análisis completo.`;
   function exportSheet(key){ const rows=exportRows(key); if(window.XLSX){const wb=XLSX.utils.book_new(); appendStyledSheet(wb,key,rows); XLSX.writeFile(wb,`Galera_${key}_v3_3.xlsx`);} else download(`${key}.json`,JSON.stringify(rows,null,2),'application/json'); }
   function exportVarietalPortfolio(){ return varietalPortfolio().map(x=>({'Variedad':x.variedad,'Competidor benchmark':[...x.benchmarks].filter(Boolean).join(' / '),'Cultivos':[...x.cultivos].filter(Boolean).join(', '),'Regiones':[...x.regions].filter(Boolean).join(', '),'Ensayos':x.trials,'ROI promedio %':avg(x.roi),'Mejora vs control %':avg(x.mejora),'Leads':x.leads,'Órdenes':x.orders,'Ventas cobradas $':x.sales,'Score técnico %':x.technicalScore,'Score varietal %':x.score,'Estatus Galera':x.status,'Decisión':x.decision})); }
   function download(filename,content,type){ const blob=new Blob([content],{type}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
+
+  function exportJSON(){
+    const payload={version:'Galera RICO v3.9.1',exportedAt:new Date().toISOString(),data:data(),audit:qualityAudit().alerts};
+    download('Galera_RICO_v3_9_1_respaldo.json',JSON.stringify(payload,null,2),'application/json');
+  }
+  function importJSON(){
+    const file=$('jsonImport')?.files?.[0];
+    if(!file){alert('Selecciona un archivo JSON de respaldo generado por esta herramienta.');return;}
+    const phrase=prompt('Restauración técnica avanzada. Para confirmar escribe: RESTAURAR GALERA');
+    if(String(phrase||'').trim()!=='RESTAURAR GALERA'){
+      toast('Restauración cancelada: frase de confirmación incorrecta.','warn');
+      return;
+    }
+    const r=new FileReader();
+    r.onload=()=>{
+      try{
+        const obj=JSON.parse(r.result);
+        const dd=obj.data||obj;
+        Object.entries({trials:K.trials,evidence:K.evidence,results:K.results,events:K.events,leads:K.leads,demand:K.demand,inventory:K.inventory,accounts:K.accounts,scores:K.scores,clients:K.clients,payments:K.payments,unlocks:K.unlocks,promises:K.promises,policies:K.policies,importBatches:K.importBatches}).forEach(([k,key])=>{if(Array.isArray(dd[k]))write(key,dd[k]);});
+        if(dd.policies&&!Array.isArray(dd.policies))write(K.policies,[dd.policies]);
+        const audit=qualityAudit();
+        toast('JSON restaurado · auditoría: '+audit.alerts.length+' hallazgos',audit.alerts.some(a=>a.sev==='bad')?'warn':'good');
+        state.page='calidad'; show('calidad');
+      }catch(e){console.error(e);alert('JSON inválido o incompatible.');}
+    };
+    r.readAsText(file);
+  }
+
   function clearAll(){
     if(!confirm('Esto borrará TODOS los datos locales guardados en este navegador. Antes de continuar se recomienda exportar un Respaldo JSON. ¿Deseas continuar?'))return;
     const phrase=prompt('Para confirmar el borrado definitivo escribe: BORRAR GALERA');
@@ -1717,7 +1745,7 @@ Adjunto o adjuntaré el Excel integral del sistema para análisis completo.`;
 
   function renderEventPost(){ const d=data(); const eventRows=d.events.map(e=>{const pp=financialPolicyFor({event:e.nombre,evento:e.nombre,cultivo:e.cultivo,zona:e.zona}); const leads=d.leads.filter(l=>eq(l.eventId,e.id)); const orders=leads.filter(leadIsOrder); const paid=sum(leads.map(l=>leadPaidMXN(l.id))); const margin=paid*(pp.eventMarginPct/100); const actualRoi=e.cost?((margin-e.cost)/e.cost)*100:0; return `<tr><td>${esc(e.nombre)}</td><td>${int(leads.length)}</td><td>${int(orders.length)}</td><td>${money(paid)}</td><td>${pct(pp.eventMarginPct)}${pp.rule?`<br><span class="small muted">${esc(pp.rule.scope)}: ${esc(pp.rule.key)}</span>`:''}</td><td>${money(margin)}</td><td>${pct(actualRoi)}</td><td>${esc(e.post30||'Pendiente')}</td><td>${esc(e.post90||'Pendiente')}</td><td><button class="btn-warning btn-sm" onclick="APP.edit('post','${esc(e.id)}')">Post</button></td></tr>`}); const latest=latestResultsByTrial(); const trialRows=d.trials.map(t=>{const leads=d.leads.filter(l=>eq(l.trialId,t.id)); const r=latest[t.id]; const paid=sum(leads.map(l=>leadPaidMXN(l.id))); return `<tr><td>${esc(t.id)}</td><td>${esc(t.cultivo)}</td><td>${esc(t.variedad)}</td><td>${pct(r?.roiPct||0)}</td><td>${pct(r?.mejoraPct||0)}</td><td>${int(leads.length)}</td><td>${money(paid)}</td><td>${esc((r?.conclusion||'Pendiente').slice(0,120))}</td><td>${esc((r?.implicacionComercial||r?.recomendacionComercialFinal||r?.recomendacion||'Pendiente').slice(0,120))}</td></tr>`}); $('pipeline_content').innerHTML=`<div class="card"><div class="section-title"><h2>Post-mortem de eventos</h2>${pill('30 / 90 días','blue')}</div><p class="muted">v3.9: el ROI real se calcula con <b>margen cobrado atribuible</b>. Puede usar margen base o regla granular por evento/cultivo.</p>${table(['Evento','Leads','Órdenes','Venta cobrada real','% Margen','Margen cobrado','ROI real cobrado','Post 30','Post 90','Acción'],eventRows)}</div>${state.editing.post?postForm(state.editing.post):''}<div class="card"><div class="section-title"><h2>Post-mortem de ensayos</h2>${pill('Resultado + salida comercial + cobro','blue')}</div>${table(['Folio','Cultivo','Variedad','ROI técnico','Mejora','Leads','Venta cobrada real','Conclusión técnica','Salida comercial / recomendación'],trialRows)}</div>`; }
 
-  function exportWorkbook(){ const d=data(); if(!window.XLSX){exportJSON();return;} const wb=XLSX.utils.book_new(); Object.entries({ensayos:enrichTrials(d.trials),bitacora:d.evidence,resultados:enrichResults(d.results),eventos:d.events,leads_pipeline:d.leads,demanda:d.demand,inventario:d.inventory,clientes:d.clients,cartera:d.accounts,pagos:d.payments,promesas:read(K.promises),scoring:d.scores,desbloqueos:d.unlocks,politica_financiera:[financialPolicy()],politica_financiera_detalle:read(K.policies),bitacora_importaciones:read(K.importBatches),portafolio_varietal:exportVarietalPortfolio(),alertas:qualityAudit().alerts,notas_variables:exportNotesRows()}).forEach(([name,rows])=>appendStyledSheet(wb,name,rows)); XLSX.writeFile(wb,'Galera_RICO_v3_9_refinamientos_integrales.xlsx'); }
+  function exportWorkbook(){ const d=data(); if(!window.XLSX){exportJSON();return;} const wb=XLSX.utils.book_new(); Object.entries({ensayos:enrichTrials(d.trials),bitacora:d.evidence,resultados:enrichResults(d.results),eventos:d.events,leads_pipeline:d.leads,demanda:d.demand,inventario:d.inventory,clientes:d.clients,cartera:d.accounts,pagos:d.payments,promesas:read(K.promises),scoring:d.scores,desbloqueos:d.unlocks,politica_financiera:[financialPolicy()],politica_financiera_detalle:read(K.policies),bitacora_importaciones:read(K.importBatches),portafolio_varietal:exportVarietalPortfolio(),alertas:qualityAudit().alerts,notas_variables:exportNotesRows()}).forEach(([name,rows])=>appendStyledSheet(wb,name,rows)); XLSX.writeFile(wb,'Galera_RICO_v3_9_1_fix_dashboard_visible.xlsx'); }
 
 
   function importTemplateSpecs(){ return {
