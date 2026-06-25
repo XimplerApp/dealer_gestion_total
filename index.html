@@ -284,7 +284,7 @@ button[disabled]{opacity:.48;cursor:not-allowed;transform:none!important;box-sha
 <div class="app auth-locked" id="appShell">
   <aside class="sidebar">
     <div class="brand">
-      <h1>🌾 Galera RICO v4.0</h1>
+      <h1>🌾 Galera RICO v4.0.2</h1>
       <p>Sistema integral para dealer de semillas: campo, eventos, pipeline, S&OP, cartera e inteligencia varietal.</p>
     </div>
     <div class="nav" id="nav"></div>
@@ -319,7 +319,7 @@ button[disabled]{opacity:.48;cursor:not-allowed;transform:none!important;box-sha
 <script>
 const APP = (()=>{
   'use strict';
-  const VERSION='4.0.1';
+  const VERSION='4.0.2';
   const STORE_PREFIX='galera_rico_v2_';
   const K={trials:'trials',evidence:'evidence',results:'results',events:'events',leads:'leads',demand:'demand',inventory:'inventory',accounts:'accounts',scores:'scores',clients:'clients',payments:'payments',unlocks:'unlocks',promises:'promises',policies:'policies',importBatches:'importBatches',settings:'settings'};
   const AUTH={users:'auth_users',session:'auth_session',audit:'auth_audit'};
@@ -415,7 +415,12 @@ const APP = (()=>{
   function saveSession(s){localStorage.setItem(storeKey(AUTH.session),JSON.stringify(s));}
   function clearSession(){localStorage.removeItem(storeKey(AUTH.session));}
   function normalizeUsername(v){return String(v||'').trim().toLowerCase();}
-  function passwordValue(id){return String($(id)?.value??'').trim();}
+  function passwordValue(id){return String($(id)?.value??'');}
+  function passwordCandidates(password){
+    const raw=String(password??'');
+    const trimmed=raw.trim();
+    return [...new Set([raw,trimmed])];
+  }
   function stableHash(text){
     const str=String(text||''); let h1=0x811c9dc5, h2=0x9747b28c;
     for(let i=0;i<str.length;i++){
@@ -425,8 +430,21 @@ const APP = (()=>{
     }
     return 'v2_'+(h1>>>0).toString(16).padStart(8,'0')+(h2>>>0).toString(16).padStart(8,'0');
   }
-  function passHash(username,password){return stableHash('GALERA_RICO_V4_PASSWORD_ONLY|'+String(password||'').trim());}
-  function legacyPassHash(username,password){return btoa(unescape(encodeURIComponent(String(username||'').trim().toLowerCase()+'|'+String(password||'').trim()+'|GALERA_RICO_V4_LOCAL')));}
+  function passHash(username,password){return stableHash('GALERA_RICO_V4_PASSWORD_ONLY|'+String(password??''));}
+  function legacyPassHash(username,password){return btoa(unescape(encodeURIComponent(String(username||'').trim().toLowerCase()+'|'+String(password??'').trim()+'|GALERA_RICO_V4_LOCAL')));}
+  function allPasswordHashes(username,password){
+    const user=normalizeUsername(username);
+    const out=[];
+    passwordCandidates(password).forEach(p=>{
+      out.push(passHash('',p));
+      out.push(stableHash('GALERA_RICO_V4_PASSWORD_ONLY|'+String(p).trim()));
+      out.push(stableHash('GALERA_RICO_V4_LOCAL|'+user+'|'+String(p)));
+      out.push(stableHash(user+'|'+String(p)+'|GALERA_RICO_V4_LOCAL'));
+      out.push(stableHash(user+'|'+String(p).trim()+'|GALERA_RICO_V4_LOCAL'));
+      try{out.push(legacyPassHash(user,p));}catch(e){}
+    });
+    return [...new Set(out.filter(Boolean))];
+  }
   function legacyDecodedPassword(hash){
     try{
       const raw=decodeURIComponent(escape(atob(String(hash||''))));
@@ -438,17 +456,16 @@ const APP = (()=>{
     }catch(e){return null;}
   }
   function verifyPassword(u,username,password){
-    const pwd=String(password||'').trim();
-    const current=passHash('',pwd);
-    if(u?.passwordHashV2&&u.passwordHashV2===current)return true;
-    if(u?.passwordHash&&u.passwordHash===current)return true;
-    if(u?.passwordHash&&(u.passwordHash===legacyPassHash(username,pwd)||u.passwordHash===legacyPassHash(u.username,pwd)))return true;
+    const hashes=allPasswordHashes(username,password);
+    if(u?.passwordHashV2&&hashes.includes(u.passwordHashV2))return true;
+    if(u?.passwordHash&&hashes.includes(u.passwordHash))return true;
+    if(u?.passwordHash&&allPasswordHashes(u.username,password).includes(u.passwordHash))return true;
     const legacyPwd=legacyDecodedPassword(u?.passwordHash);
-    return legacyPwd!==null&&String(legacyPwd).trim()===pwd;
+    return legacyPwd!==null&&passwordCandidates(password).some(p=>String(legacyPwd)===String(p)||String(legacyPwd).trim()===String(p).trim());
   }
   function migratePasswordRecord(u,password){
-    const h=passHash('',password);
-    return {...u,passwordHash:h,passwordHashV2:h,passwordVersion:'4.0.1',updatedAt:now()};
+    const h=passHash('',passwordCandidates(password)[0]);
+    return {...u,passwordHash:h,passwordHashV2:h,passwordVersion:'4.0.2',updatedAt:now()};
   }
   function rolePerms(role){return {...(ROLE_PRESETS[role]||ROLE_PRESETS.consulta)};}
   function normalizePerms(perms,role='consulta'){const base=rolePerms(role); Object.keys(PERMISSIONS).forEach(k=>base[k]=!!(perms&&perms[k]!==undefined?perms[k]:base[k])); return base;}
@@ -461,13 +478,31 @@ const APP = (()=>{
   function renderLogin(){
     const hasUsers=users().length>0; const el=$('loginScreen'); if(!el)return;
     $('appShell')?.classList.add('auth-locked'); el.classList.remove('hidden');
-    el.innerHTML=`<div class="login-card"><div class="login-hero"><div class="login-copy"><div><h1>🌾 Galera RICO v4.0</h1><p>Sistema integral con login local, roles y permisos para proteger captura, importaciones, borrado de datos y administración de usuarios.</p><div class="notice info" style="background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.16);color:#e0f2fe"><b>Flujo:</b> inicia sesión → entra a la herramienta → si tienes permiso, entra al Administrador de Usuarios.</div></div><p class="small">Nota técnica: esta versión controla permisos en el navegador. Para seguridad real multi-equipo se recomienda conectar backend, base de datos y autenticación del servidor.</p></div><div class="login-form">${hasUsers?loginFormHtml():setupFormHtml()}</div></div></div>`;
+    el.innerHTML=`<div class="login-card"><div class="login-hero"><div class="login-copy"><div><h1>🌾 Galera RICO v4.0.2</h1><p>Sistema integral con login local, roles y permisos para proteger captura, importaciones, borrado de datos y administración de usuarios.</p><div class="notice info" style="background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.16);color:#e0f2fe"><b>Flujo:</b> inicia sesión → entra a la herramienta → si tienes permiso, entra al Administrador de Usuarios.</div></div><p class="small">Nota técnica: esta versión controla permisos en el navegador. Para seguridad real multi-equipo se recomienda conectar backend, base de datos y autenticación del servidor.</p></div><div class="login-form">${hasUsers?loginFormHtml():setupFormHtml()}</div></div></div>`;
     setTimeout(()=>{ const first=hasUsers?$('login_username'):$('setup_name'); first?.focus(); },50);
   }
-  function loginFormHtml(){return `<h2>Acceso de usuario</h2><label>Usuario</label><input id="login_username" autocomplete="username" onkeydown="if(event.key==='Enter')APP.login()"><label>Contraseña</label><input id="login_password" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')APP.login()"><div class="actions"><button class="btn-primary" onclick="APP.login()">Entrar a herramienta</button></div><div class="notice info" style="margin-top:12px"><b>Permisos activos:</b> captura, edición, eliminación, importación, borrado, exportación y usuarios se gobiernan por rol.</div>`;}
+  function loginFormHtml(){return `<h2>Acceso de usuario</h2><label>Usuario</label><input id="login_username" autocomplete="username" onkeydown="if(event.key==='Enter')APP.login()"><label>Contraseña</label><input id="login_password" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')APP.login()"><div class="actions"><button class="btn-primary" onclick="APP.login()">Entrar a herramienta</button></div><div class="notice info" style="margin-top:12px"><b>Permisos activos:</b> captura, edición, eliminación, importación, borrado, exportación y usuarios se gobiernan por rol.</div><details class="form-guide" style="margin-top:12px"><summary>🔐 Reparar acceso administrador local</summary><p class="small muted">Úsalo solamente si el navegador conserva usuarios pero rechaza la contraseña correcta. No borra ensayos, cartera, pipeline, importaciones ni datos operativos; solo restablece el acceso del administrador local.</p><label>Usuario administrador a reparar</label><input id="recover_username" placeholder="admin"><label>Nueva contraseña</label><input id="recover_password" type="password" autocomplete="new-password" placeholder="mínimo 8 caracteres"><label>Confirmación de seguridad</label><input id="recover_phrase" placeholder="Escribe: RECUPERAR ADMIN"><div class="actions"><button class="btn-warning" onclick="APP.recoverAdminAccess()">Reparar contraseña administrador</button></div></details>`;}
   function setupFormHtml(){return `<h2>Crear primer administrador</h2><p class="muted">No existen usuarios todavía. Crea el primer administrador para activar la v4.0.</p><label>Nombre</label><input id="setup_name"><label>Usuario</label><input id="setup_username" autocomplete="username" placeholder="admin"><label>Contraseña</label><input id="setup_password" type="password" autocomplete="new-password" placeholder="mínimo 8 caracteres" onkeydown="if(event.key==='Enter')APP.createFirstAdmin()"><div class="actions"><button class="btn-success" onclick="APP.createFirstAdmin()">Crear administrador y entrar</button></div>`;}
-  function createFirstAdmin(){ const name=field('setup_name')||'Administrador'; const username=normalizeUsername(field('setup_username')||'admin'); const password=passwordValue('setup_password'); if(password.length<8){alert('La contraseña debe tener mínimo 8 caracteres.');return;} const h=passHash('',password); const u={id:uid('USR'),name,username,role:'admin',status:'Activo',perms:rolePerms('admin'),passwordHash:h,passwordHashV2:h,passwordVersion:'4.0.1',createdAt:now(),updatedAt:now(),lastLogin:''}; saveUsers([u]); saveSession({userId:u.id,loginAt:new Date().toISOString()}); state.auth.user=currentUser(); audit('setup_admin','Primer administrador creado'); startApp('dashboard'); }
+  function createFirstAdmin(){ const name=field('setup_name')||'Administrador'; const username=normalizeUsername(field('setup_username')||'admin'); const password=passwordValue('setup_password'); if(password.length<8){alert('La contraseña debe tener mínimo 8 caracteres.');return;} const h=passHash('',password); const u={id:uid('USR'),name,username,role:'admin',status:'Activo',perms:rolePerms('admin'),passwordHash:h,passwordHashV2:h,passwordVersion:'4.0.2',createdAt:now(),updatedAt:now(),lastLogin:''}; saveUsers([u]); saveSession({userId:u.id,loginAt:new Date().toISOString()}); state.auth.user=currentUser(); audit('setup_admin','Primer administrador creado'); startApp('dashboard'); }
   function login(){ const username=normalizeUsername(field('login_username')); const password=passwordValue('login_password'); const u=users().find(x=>normalizeUsername(x.username)===username); if(!u||u.status==='Inactivo'||!verifyPassword(u,username,password)){toast('Usuario o contraseña incorrectos','bad');return;} const migrated=migratePasswordRecord(u,password); const arr=users().map(x=>eq(x.id,u.id)?{...migrated,lastLogin:now()}:x); saveUsers(arr); saveSession({userId:u.id,loginAt:new Date().toISOString()}); state.auth.user=currentUser(); audit('login','Inicio de sesión'); startApp('dashboard'); }
+  function recoverAdminAccess(){
+    const phrase=field('recover_phrase');
+    if(phrase!=='RECUPERAR ADMIN'){alert('Para confirmar, escribe exactamente: RECUPERAR ADMIN');return;}
+    const password=passwordValue('recover_password');
+    if(password.length<8){alert('La nueva contraseña debe tener mínimo 8 caracteres.');return;}
+    let arr=users();
+    if(!arr.length){alert('No hay usuarios locales que reparar. Crea el primer administrador.');renderLogin();return;}
+    let username=normalizeUsername(field('recover_username')||'admin');
+    let target=arr.find(u=>normalizeUsername(u.username)===username)||arr.find(u=>u.status!=='Inactivo'&&(u.role==='admin'||normalizePerms(u.perms,u.role).manageUsers))||arr[0];
+    if(arr.some(u=>!eq(u.id,target.id)&&normalizeUsername(u.username)===username)) username=normalizeUsername(target.username)||'admin';
+    const h=passHash('',password);
+    const repaired={...target,username:username||normalizeUsername(target.username)||'admin',role:'admin',status:'Activo',perms:rolePerms('admin'),passwordHash:h,passwordHashV2:h,passwordVersion:'4.0.2-recovery',updatedAt:now()};
+    saveUsers(arr.map(u=>eq(u.id,target.id)?repaired:u));
+    clearSession();
+    audit('admin_recovery','Contraseña de administrador local restablecida para '+repaired.username);
+    renderLogin();
+    setTimeout(()=>{setVal('login_username',repaired.username); const p=$('login_password'); if(p)p.focus(); toast('Acceso administrador reparado. Entra con la nueva contraseña.','good');},50);
+  }
   function logout(){ audit('logout','Cierre de sesión'); clearSession(); state.auth.user=null; renderLogin(); }
   function applyAuthUI(){ const u=state.auth.user||currentUser(); const s=$('authStatus'); if(s&&u)s.innerHTML=`${esc(u.name||u.username)} · ${esc(roleLabel(u.role))}`; qa('[data-perm]').forEach(el=>{const p=el.getAttribute('data-perm'); if(p&&!can(p)){el.classList.add('hidden');}else{el.classList.remove('hidden');}}); qa('button').forEach(b=>b.classList.remove('readonly-lock')); if(u&&!can('capture'))qa('button').forEach(b=>{ if(/Guardar|Crear lead|Cargar datos demo|Importar|Borrar|Eliminar/.test(b.textContent||'')) b.classList.add('readonly-lock'); }); }
   function roleLabel(role){return {admin:'Administrador',captura:'Captura operativa',direccion:'Dirección / consulta ejecutiva',consulta:'Solo consulta'}[role]||role;}
@@ -1861,7 +1896,7 @@ Adjunto o adjuntaré el Excel integral del sistema para análisis completo.`;
 
   function renderEventPost(){ const d=data(); const eventRows=d.events.map(e=>{const pp=financialPolicyFor({event:e.nombre,evento:e.nombre,cultivo:e.cultivo,zona:e.zona}); const leads=d.leads.filter(l=>eq(l.eventId,e.id)); const orders=leads.filter(leadIsOrder); const paid=sum(leads.map(l=>leadPaidMXN(l.id))); const margin=paid*(pp.eventMarginPct/100); const actualRoi=e.cost?((margin-e.cost)/e.cost)*100:0; return `<tr><td>${esc(e.nombre)}</td><td>${int(leads.length)}</td><td>${int(orders.length)}</td><td>${money(paid)}</td><td>${pct(pp.eventMarginPct)}${pp.rule?`<br><span class="small muted">${esc(pp.rule.scope)}: ${esc(pp.rule.key)}</span>`:''}</td><td>${money(margin)}</td><td>${pct(actualRoi)}</td><td>${esc(e.post30||'Pendiente')}</td><td>${esc(e.post90||'Pendiente')}</td><td><button class="btn-warning btn-sm" onclick="APP.edit('post','${esc(e.id)}')">Post</button></td></tr>`}); const latest=latestResultsByTrial(); const trialRows=d.trials.map(t=>{const leads=d.leads.filter(l=>eq(l.trialId,t.id)); const r=latest[t.id]; const paid=sum(leads.map(l=>leadPaidMXN(l.id))); return `<tr><td>${esc(t.id)}</td><td>${esc(t.cultivo)}</td><td>${esc(t.variedad)}</td><td>${pct(r?.roiPct||0)}</td><td>${pct(r?.mejoraPct||0)}</td><td>${int(leads.length)}</td><td>${money(paid)}</td><td>${esc((r?.conclusion||'Pendiente').slice(0,120))}</td><td>${esc((r?.implicacionComercial||r?.recomendacionComercialFinal||r?.recomendacion||'Pendiente').slice(0,120))}</td></tr>`}); $('pipeline_content').innerHTML=`<div class="card"><div class="section-title"><h2>Post-mortem de eventos</h2>${pill('30 / 90 días','blue')}</div><p class="muted">v3.9: el ROI real se calcula con <b>margen cobrado atribuible</b>. Puede usar margen base o regla granular por evento/cultivo.</p>${table(['Evento','Leads','Órdenes','Venta cobrada real','% Margen','Margen cobrado','ROI real cobrado','Post 30','Post 90','Acción'],eventRows)}</div>${state.editing.post?postForm(state.editing.post):''}<div class="card"><div class="section-title"><h2>Post-mortem de ensayos</h2>${pill('Resultado + salida comercial + cobro','blue')}</div>${table(['Folio','Cultivo','Variedad','ROI técnico','Mejora','Leads','Venta cobrada real','Conclusión técnica','Salida comercial / recomendación'],trialRows)}</div>`; }
 
-  function exportWorkbook(){ const d=data(); if(!window.XLSX){exportJSON();return;} const wb=XLSX.utils.book_new(); Object.entries({ensayos:enrichTrials(d.trials),bitacora:d.evidence,resultados:enrichResults(d.results),eventos:d.events,leads_pipeline:d.leads,demanda:d.demand,inventario:d.inventory,clientes:d.clients,cartera:d.accounts,pagos:d.payments,promesas:read(K.promises),scoring:d.scores,desbloqueos:d.unlocks,politica_financiera:[financialPolicy()],politica_financiera_detalle:read(K.policies),bitacora_importaciones:read(K.importBatches),portafolio_varietal:exportVarietalPortfolio(),alertas:qualityAudit().alerts,notas_variables:exportNotesRows()}).forEach(([name,rows])=>appendStyledSheet(wb,name,rows)); XLSX.writeFile(wb,'Galera_RICO_v4_0_login_permisos.xlsx'); }
+  function exportWorkbook(){ const d=data(); if(!window.XLSX){exportJSON();return;} const wb=XLSX.utils.book_new(); Object.entries({ensayos:enrichTrials(d.trials),bitacora:d.evidence,resultados:enrichResults(d.results),eventos:d.events,leads_pipeline:d.leads,demanda:d.demand,inventario:d.inventory,clientes:d.clients,cartera:d.accounts,pagos:d.payments,promesas:read(K.promises),scoring:d.scores,desbloqueos:d.unlocks,politica_financiera:[financialPolicy()],politica_financiera_detalle:read(K.policies),bitacora_importaciones:read(K.importBatches),portafolio_varietal:exportVarietalPortfolio(),alertas:qualityAudit().alerts,notas_variables:exportNotesRows()}).forEach(([name,rows])=>appendStyledSheet(wb,name,rows)); XLSX.writeFile(wb,'Galera_RICO_v4_0_2_login_permisos.xlsx'); }
 
 
   function importTemplateSpecs(){ return {
@@ -1893,7 +1928,7 @@ Adjunto o adjuntaré el Excel integral del sistema para análisis completo.`;
 
   function init(){ state.auth.user=currentUser(); if(!state.auth.user){renderLogin();return;} startApp('dashboard'); }
   const guard=(fn,perm,label)=>(...args)=>{ if(perm&&!requirePerm(perm,label))return; const res=fn(...args); if(perm)audit(label||perm,args.join(' · ')); return res; };
-  return {init,show,sub,render,login,logout,createFirstAdmin,saveUser:guard(saveUser,'manageUsers','guardar usuario'),editUser,deleteUser,applyRolePresetForm,resetUserForm,setTrialFilter,setPipeFilter,applyIntelFilters,clearIntelFilters,applyIntelPreset,saveIntelWeights:guard(saveIntelWeights,'edit','guardar pesos varietales'),resetIntelWeights,changeRadarVar,generateRicoBrief,copyRicoBrief,downloadRicoBrief:guard(downloadRicoBrief,'exportData','descargar brief'),exportRicoJSON:guard(exportRicoJSON,'exportData','exportar paquete RICO'),openRicoAgent,saveTrial:guard(saveTrial,'capture','guardar ensayo'),saveEvidence:guard(saveEvidence,'capture','guardar bitácora'),prefillResult,previewResult,saveResult:guard(saveResult,'capture','guardar resultado'),createLeadFromTrial:guard(createLeadFromTrial,'capture','crear lead desde ensayo'),printRecipe,previewEvent,saveEvent:guard(saveEvent,'capture','guardar evento'),saveLead:guard(saveLead,'capture','guardar lead'),savePost:guard(savePost,'capture','guardar post-mortem'),quickLead:guard(quickLead,'capture','captura rápida lead'),saveDemand:guard(saveDemand,'capture','guardar demanda'),saveInventory:guard(saveInventory,'capture','guardar inventario'),pullClientFromLead,saveClient:guard(saveClient,'capture','guardar cliente'),fillAccountFromLead,prefillPaymentClient,refreshPaymentAccounts,savePayment:guard(savePayment,'capture','guardar pago'),refreshPromiseAccounts,prefillPromiseAccount,savePromise:guard(savePromise,'capture','guardar promesa'),editPromise:guard(editPromise,'edit','editar promesa'),removePromise:guard(removePromise,'delete','eliminar promesa'),previewScore,saveScore:guard(saveScore,'capture','guardar scoring'),saveAccount:guard(saveAccount,'capture','guardar CxC'),saveUnlock:guard(saveUnlock,'capture','guardar desbloqueo'),refreshUnlockReferences,saveFinancialPolicy:guard(saveFinancialPolicy,'financialRules','guardar política financiera'),savePolicyRule:guard(savePolicyRule,'financialRules','guardar regla financiera'),edit:guard(edit,'edit','editar registro'),cancelEdit,remove:guard(remove,'delete','eliminar registro'),exportWorkbook:guard(exportWorkbook,'exportData','exportar Excel'),exportSheet:guard(exportSheet,'exportData','exportar hoja'),exportJSON:guard(exportJSON,'exportData','exportar JSON'),importJSON:guard(importJSON,'importJSON','importar JSON'),downloadImportTemplate:guard(downloadImportTemplate,'exportData','descargar plantilla'),importExcel:guard(importExcel,'importExcel','importar Excel'),clearAll:guard(clearAll,'clearAll','borrar datos'),printReport:guard(printReport,'exportData','imprimir reporte'),seedDemo:guard(seedDemo,'seedDemo','cargar demo')};
+  return {init,show,sub,render,login,logout,recoverAdminAccess,createFirstAdmin,saveUser:guard(saveUser,'manageUsers','guardar usuario'),editUser,deleteUser,applyRolePresetForm,resetUserForm,setTrialFilter,setPipeFilter,applyIntelFilters,clearIntelFilters,applyIntelPreset,saveIntelWeights:guard(saveIntelWeights,'edit','guardar pesos varietales'),resetIntelWeights,changeRadarVar,generateRicoBrief,copyRicoBrief,downloadRicoBrief:guard(downloadRicoBrief,'exportData','descargar brief'),exportRicoJSON:guard(exportRicoJSON,'exportData','exportar paquete RICO'),openRicoAgent,saveTrial:guard(saveTrial,'capture','guardar ensayo'),saveEvidence:guard(saveEvidence,'capture','guardar bitácora'),prefillResult,previewResult,saveResult:guard(saveResult,'capture','guardar resultado'),createLeadFromTrial:guard(createLeadFromTrial,'capture','crear lead desde ensayo'),printRecipe,previewEvent,saveEvent:guard(saveEvent,'capture','guardar evento'),saveLead:guard(saveLead,'capture','guardar lead'),savePost:guard(savePost,'capture','guardar post-mortem'),quickLead:guard(quickLead,'capture','captura rápida lead'),saveDemand:guard(saveDemand,'capture','guardar demanda'),saveInventory:guard(saveInventory,'capture','guardar inventario'),pullClientFromLead,saveClient:guard(saveClient,'capture','guardar cliente'),fillAccountFromLead,prefillPaymentClient,refreshPaymentAccounts,savePayment:guard(savePayment,'capture','guardar pago'),refreshPromiseAccounts,prefillPromiseAccount,savePromise:guard(savePromise,'capture','guardar promesa'),editPromise:guard(editPromise,'edit','editar promesa'),removePromise:guard(removePromise,'delete','eliminar promesa'),previewScore,saveScore:guard(saveScore,'capture','guardar scoring'),saveAccount:guard(saveAccount,'capture','guardar CxC'),saveUnlock:guard(saveUnlock,'capture','guardar desbloqueo'),refreshUnlockReferences,saveFinancialPolicy:guard(saveFinancialPolicy,'financialRules','guardar política financiera'),savePolicyRule:guard(savePolicyRule,'financialRules','guardar regla financiera'),edit:guard(edit,'edit','editar registro'),cancelEdit,remove:guard(remove,'delete','eliminar registro'),exportWorkbook:guard(exportWorkbook,'exportData','exportar Excel'),exportSheet:guard(exportSheet,'exportData','exportar hoja'),exportJSON:guard(exportJSON,'exportData','exportar JSON'),importJSON:guard(importJSON,'importJSON','importar JSON'),downloadImportTemplate:guard(downloadImportTemplate,'exportData','descargar plantilla'),importExcel:guard(importExcel,'importExcel','importar Excel'),clearAll:guard(clearAll,'clearAll','borrar datos'),printReport:guard(printReport,'exportData','imprimir reporte'),seedDemo:guard(seedDemo,'seedDemo','cargar demo')};
 })();
 document.addEventListener('DOMContentLoaded',APP.init);
 </script>
