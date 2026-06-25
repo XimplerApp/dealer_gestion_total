@@ -319,7 +319,7 @@ button[disabled]{opacity:.48;cursor:not-allowed;transform:none!important;box-sha
 <script>
 const APP = (()=>{
   'use strict';
-  const VERSION='4.0';
+  const VERSION='4.0.1';
   const STORE_PREFIX='galera_rico_v2_';
   const K={trials:'trials',evidence:'evidence',results:'results',events:'events',leads:'leads',demand:'demand',inventory:'inventory',accounts:'accounts',scores:'scores',clients:'clients',payments:'payments',unlocks:'unlocks',promises:'promises',policies:'policies',importBatches:'importBatches',settings:'settings'};
   const AUTH={users:'auth_users',session:'auth_session',audit:'auth_audit'};
@@ -414,7 +414,42 @@ const APP = (()=>{
   function sessionObj(){try{return JSON.parse(localStorage.getItem(storeKey(AUTH.session)))||null}catch(e){return null}}
   function saveSession(s){localStorage.setItem(storeKey(AUTH.session),JSON.stringify(s));}
   function clearSession(){localStorage.removeItem(storeKey(AUTH.session));}
-  function passHash(username,password){return btoa(unescape(encodeURIComponent(String(username||'').trim().toLowerCase()+'|'+String(password||'')+'|GALERA_RICO_V4_LOCAL')));}
+  function normalizeUsername(v){return String(v||'').trim().toLowerCase();}
+  function passwordValue(id){return String($(id)?.value??'').trim();}
+  function stableHash(text){
+    const str=String(text||''); let h1=0x811c9dc5, h2=0x9747b28c;
+    for(let i=0;i<str.length;i++){
+      const c=str.charCodeAt(i);
+      h1^=c; h1=Math.imul(h1,0x01000193);
+      h2^=(c+i); h2=Math.imul(h2,0x85ebca6b);
+    }
+    return 'v2_'+(h1>>>0).toString(16).padStart(8,'0')+(h2>>>0).toString(16).padStart(8,'0');
+  }
+  function passHash(username,password){return stableHash('GALERA_RICO_V4_PASSWORD_ONLY|'+String(password||'').trim());}
+  function legacyPassHash(username,password){return btoa(unescape(encodeURIComponent(String(username||'').trim().toLowerCase()+'|'+String(password||'').trim()+'|GALERA_RICO_V4_LOCAL')));}
+  function legacyDecodedPassword(hash){
+    try{
+      const raw=decodeURIComponent(escape(atob(String(hash||''))));
+      const suffix='|GALERA_RICO_V4_LOCAL';
+      if(!raw.endsWith(suffix))return null;
+      const body=raw.slice(0,-suffix.length);
+      const i=body.indexOf('|');
+      return i>=0?body.slice(i+1):null;
+    }catch(e){return null;}
+  }
+  function verifyPassword(u,username,password){
+    const pwd=String(password||'').trim();
+    const current=passHash('',pwd);
+    if(u?.passwordHashV2&&u.passwordHashV2===current)return true;
+    if(u?.passwordHash&&u.passwordHash===current)return true;
+    if(u?.passwordHash&&(u.passwordHash===legacyPassHash(username,pwd)||u.passwordHash===legacyPassHash(u.username,pwd)))return true;
+    const legacyPwd=legacyDecodedPassword(u?.passwordHash);
+    return legacyPwd!==null&&String(legacyPwd).trim()===pwd;
+  }
+  function migratePasswordRecord(u,password){
+    const h=passHash('',password);
+    return {...u,passwordHash:h,passwordHashV2:h,passwordVersion:'4.0.1',updatedAt:now()};
+  }
   function rolePerms(role){return {...(ROLE_PRESETS[role]||ROLE_PRESETS.consulta)};}
   function normalizePerms(perms,role='consulta'){const base=rolePerms(role); Object.keys(PERMISSIONS).forEach(k=>base[k]=!!(perms&&perms[k]!==undefined?perms[k]:base[k])); return base;}
   function currentUser(){ const s=sessionObj(); if(!s||!s.userId)return null; const u=users().find(x=>eq(x.id,s.userId)); if(!u||u.status==='Inactivo')return null; return {...u,perms:normalizePerms(u.perms,u.role)}; }
@@ -431,8 +466,8 @@ const APP = (()=>{
   }
   function loginFormHtml(){return `<h2>Acceso de usuario</h2><label>Usuario</label><input id="login_username" autocomplete="username" onkeydown="if(event.key==='Enter')APP.login()"><label>Contraseña</label><input id="login_password" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')APP.login()"><div class="actions"><button class="btn-primary" onclick="APP.login()">Entrar a herramienta</button></div><div class="notice info" style="margin-top:12px"><b>Permisos activos:</b> captura, edición, eliminación, importación, borrado, exportación y usuarios se gobiernan por rol.</div>`;}
   function setupFormHtml(){return `<h2>Crear primer administrador</h2><p class="muted">No existen usuarios todavía. Crea el primer administrador para activar la v4.0.</p><label>Nombre</label><input id="setup_name"><label>Usuario</label><input id="setup_username" autocomplete="username" placeholder="admin"><label>Contraseña</label><input id="setup_password" type="password" autocomplete="new-password" placeholder="mínimo 8 caracteres" onkeydown="if(event.key==='Enter')APP.createFirstAdmin()"><div class="actions"><button class="btn-success" onclick="APP.createFirstAdmin()">Crear administrador y entrar</button></div>`;}
-  function createFirstAdmin(){ const name=field('setup_name')||'Administrador'; const username=field('setup_username')||'admin'; const password=field('setup_password'); if(password.length<8){alert('La contraseña debe tener mínimo 8 caracteres.');return;} const u={id:uid('USR'),name,username:username.trim().toLowerCase(),role:'admin',status:'Activo',perms:rolePerms('admin'),passwordHash:passHash(username,password),createdAt:now(),updatedAt:now(),lastLogin:''}; saveUsers([u]); saveSession({userId:u.id,loginAt:new Date().toISOString()}); state.auth.user=currentUser(); audit('setup_admin','Primer administrador creado'); startApp('dashboard'); }
-  function login(){ const username=field('login_username').toLowerCase(); const password=field('login_password'); const u=users().find(x=>String(x.username||'').toLowerCase()===username); if(!u||u.status==='Inactivo'||u.passwordHash!==passHash(username,password)){toast('Usuario o contraseña incorrectos','bad');return;} const arr=users().map(x=>eq(x.id,u.id)?{...x,lastLogin:now()}:x); saveUsers(arr); saveSession({userId:u.id,loginAt:new Date().toISOString()}); state.auth.user=currentUser(); audit('login','Inicio de sesión'); startApp('dashboard'); }
+  function createFirstAdmin(){ const name=field('setup_name')||'Administrador'; const username=normalizeUsername(field('setup_username')||'admin'); const password=passwordValue('setup_password'); if(password.length<8){alert('La contraseña debe tener mínimo 8 caracteres.');return;} const h=passHash('',password); const u={id:uid('USR'),name,username,role:'admin',status:'Activo',perms:rolePerms('admin'),passwordHash:h,passwordHashV2:h,passwordVersion:'4.0.1',createdAt:now(),updatedAt:now(),lastLogin:''}; saveUsers([u]); saveSession({userId:u.id,loginAt:new Date().toISOString()}); state.auth.user=currentUser(); audit('setup_admin','Primer administrador creado'); startApp('dashboard'); }
+  function login(){ const username=normalizeUsername(field('login_username')); const password=passwordValue('login_password'); const u=users().find(x=>normalizeUsername(x.username)===username); if(!u||u.status==='Inactivo'||!verifyPassword(u,username,password)){toast('Usuario o contraseña incorrectos','bad');return;} const migrated=migratePasswordRecord(u,password); const arr=users().map(x=>eq(x.id,u.id)?{...migrated,lastLogin:now()}:x); saveUsers(arr); saveSession({userId:u.id,loginAt:new Date().toISOString()}); state.auth.user=currentUser(); audit('login','Inicio de sesión'); startApp('dashboard'); }
   function logout(){ audit('logout','Cierre de sesión'); clearSession(); state.auth.user=null; renderLogin(); }
   function applyAuthUI(){ const u=state.auth.user||currentUser(); const s=$('authStatus'); if(s&&u)s.innerHTML=`${esc(u.name||u.username)} · ${esc(roleLabel(u.role))}`; qa('[data-perm]').forEach(el=>{const p=el.getAttribute('data-perm'); if(p&&!can(p)){el.classList.add('hidden');}else{el.classList.remove('hidden');}}); qa('button').forEach(b=>b.classList.remove('readonly-lock')); if(u&&!can('capture'))qa('button').forEach(b=>{ if(/Guardar|Crear lead|Cargar datos demo|Importar|Borrar|Eliminar/.test(b.textContent||'')) b.classList.add('readonly-lock'); }); }
   function roleLabel(role){return {admin:'Administrador',captura:'Captura operativa',direccion:'Dirección / consulta ejecutiva',consulta:'Solo consulta'}[role]||role;}
@@ -443,7 +478,7 @@ const APP = (()=>{
   function applyRolePresetForm(){ setFormPerms(rolePerms(field('usr_role')||'consulta')); }
   function resetUserForm(){ state.editing.user=null; render(); }
   function loadUserForm(u){ if(!u)return; setVal('usr_name',u.name); setVal('usr_username',u.username); setVal('usr_role',u.role||'consulta'); setVal('usr_status',u.status||'Activo'); setFormPerms(normalizePerms(u.perms,u.role)); }
-  function saveUser(){ if(!requirePerm('manageUsers','administrar usuarios'))return; const arr=users(); const id=state.editing.user||uid('USR'); const existing=arr.find(x=>eq(x.id,id)); const username=field('usr_username').toLowerCase(); const password=field('usr_password'); if(!field('usr_name')||!username){alert('Nombre y usuario son obligatorios.');return;} if(!existing&&password.length<8){alert('La contraseña inicial debe tener mínimo 8 caracteres.');return;} if(existing&&password&&password.length<8){alert('La nueva contraseña debe tener mínimo 8 caracteres.');return;} if(arr.some(x=>!eq(x.id,id)&&String(x.username||'').toLowerCase()===username)){alert('Ese usuario ya existe.');return;} const role=field('usr_role')||'consulta'; const obj={id,name:field('usr_name'),username,role,status:field('usr_status')||'Activo',perms:formPerms(),passwordHash:password?passHash(username,password):(existing?.passwordHash||passHash(username,'Temporal123')),createdAt:existing?.createdAt||now(),updatedAt:now(),lastLogin:existing?.lastLogin||''}; const next=existing?arr.map(x=>eq(x.id,id)?obj:x):[...arr,obj]; if(!hasActiveAdmin(next)){alert('Debe quedar al menos un administrador activo con permiso de usuarios.');return;} saveUsers(next); state.auth.user=currentUser(); buildNav(); audit(existing?'user_update':'user_create',username); state.editing.user=null; toast('Usuario guardado'); render(); }
+  function saveUser(){ if(!requirePerm('manageUsers','administrar usuarios'))return; const arr=users(); const id=state.editing.user||uid('USR'); const existing=arr.find(x=>eq(x.id,id)); const username=normalizeUsername(field('usr_username')); const password=passwordValue('usr_password'); if(!field('usr_name')||!username){alert('Nombre y usuario son obligatorios.');return;} if(!existing&&password.length<8){alert('La contraseña inicial debe tener mínimo 8 caracteres.');return;} if(existing&&password&&password.length<8){alert('La nueva contraseña debe tener mínimo 8 caracteres.');return;} if(arr.some(x=>!eq(x.id,id)&&normalizeUsername(x.username)===username)){alert('Ese usuario ya existe.');return;} const role=field('usr_role')||'consulta'; const newHash=password?passHash('',password):null; const obj={id,name:field('usr_name'),username,role,status:field('usr_status')||'Activo',perms:formPerms(),passwordHash:newHash||(existing?.passwordHash||passHash('','Temporal123')),passwordHashV2:newHash||(existing?.passwordHashV2||''),passwordVersion:newHash?'4.0.1':(existing?.passwordVersion||'legacy'),createdAt:existing?.createdAt||now(),updatedAt:now(),lastLogin:existing?.lastLogin||''}; const next=existing?arr.map(x=>eq(x.id,id)?obj:x):[...arr,obj]; if(!hasActiveAdmin(next)){alert('Debe quedar al menos un administrador activo con permiso de usuarios.');return;} saveUsers(next); state.auth.user=currentUser(); buildNav(); audit(existing?'user_update':'user_create',username); state.editing.user=null; toast('Usuario guardado'); render(); }
   function hasActiveAdmin(arr){return arr.some(u=>u.status!=='Inactivo'&&(u.role==='admin'||(u.perms&&u.perms.manageUsers)));}
   function editUser(id){ if(!requirePerm('manageUsers','administrar usuarios'))return; state.editing.user=id; render(); }
   function deleteUser(id){ if(!requirePerm('manageUsers','administrar usuarios'))return; const u=currentUser(); if(u&&eq(u.id,id)){alert('No puedes eliminar tu propio usuario activo.');return;} const target=users().find(x=>eq(x.id,id)); if(!target)return; if(!confirm('¿Eliminar usuario '+target.username+'?'))return; const next=users().filter(x=>!eq(x.id,id)); if(!hasActiveAdmin(next)){alert('Debe quedar al menos un administrador activo.');return;} saveUsers(next); audit('user_delete',target.username); toast('Usuario eliminado','warn'); render(); }
